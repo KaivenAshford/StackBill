@@ -62,3 +62,15 @@ func (r *AssetRepository) GetByUserID(userID uint) ([]model.Asset, error) {
 	err := r.db.Where("user_id = ?", userID).Find(&assets).Error
 	return assets, err
 }
+
+func (r *AssetRepository) CountByUserID(userID uint) int64 {
+	var count int64
+	r.db.Model(&model.Asset{}).Where("user_id = ?", userID).Count(&count)
+	return count
+}
+
+func (r *AssetRepository) GetRecentByUserID(userID uint, limit int) ([]model.Asset, error) {
+	var assets []model.Asset
+	err := r.db.Where("user_id = ?", userID).Order("created_at DESC").Limit(limit).Find(&assets).Error
+	return assets, err
+}

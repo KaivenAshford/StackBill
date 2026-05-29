@@ -62,3 +62,44 @@ func (r *SubscriptionRepository) GetActiveByUserID(userID uint) ([]model.Subscri
 	err := r.db.Where("user_id = ? AND status = ?", userID, "active").Find(&subs).Error
 	return subs, err
 }
+
+func (r *SubscriptionRepository) CountByUserID(userID uint) int64 {
+	var count int64
+	r.db.Model(&model.Subscription{}).Where("user_id = ?", userID).Count(&count)
+	return count
+}
+
+func (r *SubscriptionRepository) GetRecentByUserID(userID uint, limit int) ([]model.Subscription, error) {
+	var subs []model.Subscription
+	err := r.db.Where("user_id = ?", userID).Order("created_at DESC").Limit(limit).Find(&subs).Error
+	return subs, err
+}
+
+type CategoryExpenseRow struct {
+	CategoryID   uint
+	CategoryName string
+	Color        string
+	Amount       float64
+}
+
+func (r *SubscriptionRepository) GetCategoryExpense(userID uint) ([]CategoryExpenseRow, error) {
+	var results []CategoryExpenseRow
+	err := r.db.Raw(`
+		SELECT c.id as category_id, c.name as category_name, c.color,
+			COALESCE(SUM(
+				CASE s.billing_cycle
+					WHEN 'weekly' THEN s.amount * 4.33 / GREATEST(s.billing_interval, 1)
+					WHEN 'monthly' THEN s.amount / GREATEST(s.billing_interval, 1)
+					WHEN 'quarterly' THEN s.amount / 3.0 / GREATEST(s.billing_interval, 1)
+					WHEN 'yearly' THEN s.amount / 12.0 / GREATEST(s.billing_interval, 1)
+					ELSE 0
+				END
+			), 0) as amount
+		FROM subscriptions s
+		JOIN categories c ON s.category_id = c.id
+		WHERE s.user_id = ? AND s.status = 'active' AND s.deleted_at IS NULL AND c.deleted_at IS NULL
+		GROUP BY c.id, c.name, c.color
+		ORDER BY amount DESC
+	`, userID).Scan(&results).Error
+	return results, err
+}

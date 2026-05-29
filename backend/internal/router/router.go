@@ -26,6 +26,7 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int) {
 	subscriptionService := service.NewSubscriptionService(subscriptionRepo)
 	assetService := service.NewAssetService(assetRepo)
 	reminderService := service.NewReminderService(reminderRepo)
+	dashboardService := service.NewDashboardService(subscriptionRepo, assetRepo, reminderRepo, categoryRepo, subscriptionService)
 
 	// Handlers
 	authHandler := api.NewAuthHandler(authService, userService)
@@ -34,6 +35,7 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int) {
 	subscriptionHandler := api.NewSubscriptionHandler(subscriptionService)
 	assetHandler := api.NewAssetHandler(assetService)
 	reminderHandler := api.NewReminderHandler(reminderService)
+	dashboardHandler := api.NewDashboardHandler(dashboardService)
 
 	apiGroup := r.Group("/api/v1")
 	{
@@ -54,6 +56,9 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int) {
 		authorized.GET("/auth/me", authHandler.GetCurrentUser)
 		authorized.PUT("/users/profile", userHandler.UpdateProfile)
 		authorized.PUT("/users/password", userHandler.UpdatePassword)
+
+		// Dashboard
+		authorized.GET("/dashboard", dashboardHandler.GetDashboard)
 
 		// Categories
 		authorized.GET("/categories", categoryHandler.List)
