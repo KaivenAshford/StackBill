@@ -53,4 +53,14 @@ export default {
     expireDate: '到期日期',
     status: '状态',
   },
+  settings: {
+    profile: '个人资料',
+    changePassword: '修改密码',
+    nickname: '昵称',
+    avatar: '头像',
+    oldPassword: '旧密码',
+    newPassword: '新密码',
+    confirmPassword: '确认密码',
+    passwordMismatch: '两次密码不一致',
+  },
 }

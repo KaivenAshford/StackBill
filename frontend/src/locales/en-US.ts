@@ -53,4 +53,14 @@ export default {
     expireDate: 'Expire Date',
     status: 'Status',
   },
+  settings: {
+    profile: 'Profile',
+    changePassword: 'Change Password',
+    nickname: 'Nickname',
+    avatar: 'Avatar',
+    oldPassword: 'Old Password',
+    newPassword: 'New Password',
+    confirmPassword: 'Confirm Password',
+    passwordMismatch: 'Passwords do not match',
+  },
 }
