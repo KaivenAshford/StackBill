@@ -53,6 +53,12 @@ export default {
     expireDate: '到期日期',
     status: '状态',
   },
+  category: {
+    name: '分类名称',
+    type: '类型',
+    color: '颜色',
+    icon: '图标',
+  },
   settings: {
     profile: '个人资料',
     changePassword: '修改密码',

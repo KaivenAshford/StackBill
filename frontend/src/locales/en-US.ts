@@ -53,6 +53,12 @@ export default {
     expireDate: 'Expire Date',
     status: 'Status',
   },
+  category: {
+    name: 'Name',
+    type: 'Type',
+    color: 'Color',
+    icon: 'Icon',
+  },
   settings: {
     profile: 'Profile',
     changePassword: 'Change Password',
