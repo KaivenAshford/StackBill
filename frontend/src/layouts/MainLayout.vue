@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NLayout, NLayoutSider, NLayoutHeader, NLayoutContent, NMenu, NButton } from 'naive-ui'
@@ -61,6 +61,12 @@ const router = useRouter()
 const route = useRoute()
 const store = useUserStore()
 const collapsed = ref(false)
+
+onMounted(() => {
+  if (store.isLoggedIn() && !store.user) {
+    store.fetchUser()
+  }
+})
 
 const currentRoute = computed(() => {
   const path = route.path

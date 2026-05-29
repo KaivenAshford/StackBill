@@ -85,7 +85,7 @@ export interface Reminder {
   updated_at: string
 }
 
-export interface DashboardStats {
+export interface DashboardData {
   monthly_expense: number
   yearly_expense: number
   subscription_count: number
@@ -93,4 +93,16 @@ export interface DashboardStats {
   upcoming_renewals: number
   expiring_assets: number
   warning_assets: number
+  recent_subscriptions: Subscription[]
+  recent_assets: Asset[]
+  upcoming_renewal_list: Subscription[]
+  expiring_asset_list: Asset[]
+  category_expense: CategoryExpense[]
+}
+
+export interface CategoryExpense {
+  category_id: number
+  category_name: string
+  amount: number
+  color: string
 }
