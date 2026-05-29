@@ -1,0 +1,19 @@
+package dto
+
+type ReminderResponse struct {
+	ID         uint   `json:"id"`
+	TargetType string `json:"target_type"`
+	TargetID   uint   `json:"target_id"`
+	RemindType string `json:"remind_type"`
+	RemindDate string `json:"remind_date"`
+	Title      string `json:"title"`
+	Content    string `json:"content"`
+	IsRead     bool   `json:"is_read"`
+}
+
+type ReminderListQuery struct {
+	Page     int    `form:"page,default=1"`
+	PageSize int    `form:"page_size,default=20"`
+	Type     string `form:"type"`
+	IsRead   *bool  `form:"is_read"`
+}

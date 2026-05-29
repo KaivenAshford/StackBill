@@ -38,5 +38,6 @@ func AutoMigrate() error {
 		&model.Subscription{},
 		&model.Asset{},
 		&model.Reminder{},
+		&model.ReminderRead{},
 	)
 }
