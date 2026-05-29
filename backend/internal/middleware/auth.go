@@ -44,19 +44,19 @@ func JWTAuth(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		auth := c.GetHeader("Authorization")
 		if auth == "" {
-			c.AbortWithStatusJSON(401, gin.H{"code": 401, "message": "missing token"})
+			c.AbortWithStatusJSON(401, gin.H{"code": 40100, "message": "unauthorized"})
 			return
 		}
 
 		parts := strings.SplitN(auth, " ", 2)
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.AbortWithStatusJSON(401, gin.H{"code": 401, "message": "invalid token format"})
+			c.AbortWithStatusJSON(401, gin.H{"code": 40100, "message": "invalid or expired token"})
 			return
 		}
 
 		claims, err := ParseToken(parts[1], secret)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"code": 401, "message": "invalid or expired token"})
+			c.AbortWithStatusJSON(401, gin.H{"code": 40100, "message": "invalid or expired token"})
 			return
 		}
 

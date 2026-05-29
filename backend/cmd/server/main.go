@@ -27,7 +27,7 @@ func main() {
 	gin.SetMode(cfg.Server.Mode)
 	r := gin.Default()
 
-	router.Setup(r, cfg.JWT.Secret)
+	router.Setup(r, database.DB, cfg.JWT.Secret, cfg.JWT.ExpireHours)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 	log.Printf("server starting on %s", addr)
