@@ -1,0 +1,19 @@
+server:
+  port: 8080
+  mode: release
+
+database:
+  host: postgres
+  port: 5432
+  user: stackbill
+  password: stackbill_password
+  dbname: stackbill
+  sslmode: disable
+
+jwt:
+  secret: ${JWT_SECRET}
+  expire_hours: 72
+
+log:
+  level: info
+  format: json
