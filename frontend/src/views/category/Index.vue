@@ -4,7 +4,9 @@
       <h2 style="margin:0">{{ t('nav.categories') }}</h2>
       <n-button type="primary" @click="showCreate = true">{{ t('common.create') }}</n-button>
     </div>
-    <n-data-table :columns="columns" :data="categories" :bordered="false" />
+    <n-spin :show="loading">
+      <n-data-table :columns="columns" :data="categories" :bordered="false" />
+    </n-spin>
     <n-modal v-model:show="showCreate" :title="editing ? t('common.edit') : t('common.create')" preset="card" style="width:480px;">
       <n-form :model="form" label-placement="left" label-width="80">
         <n-form-item :label="t('category.name')">
@@ -31,7 +33,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, h } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { NDataTable, NButton, NModal, NForm, NFormItem, NInput, NSelect, NColorPicker, NTag, NSpace, useMessage } from 'naive-ui'
+import { NDataTable, NButton, NModal, NForm, NFormItem, NInput, NSelect, NColorPicker, NTag, NSpace, NSpin, useMessage } from 'naive-ui'
 import { listCategories, createCategory, updateCategory, deleteCategory } from '@/api/category'
 import type { Category } from '@/types'
 
@@ -39,19 +41,20 @@ const { t } = useI18n()
 const message = useMessage()
 
 const categories = ref<Category[]>([])
+const loading = ref(true)
 const showCreate = ref(false)
 const editing = ref<Category | null>(null)
 const saving = ref(false)
 const form = reactive({ name: '', type: 'subscription', color: '#1890ff', icon: '' })
 
 const typeOptions = [
-  { label: 'Subscription', value: 'subscription' },
-  { label: 'Asset', value: 'asset' },
+  { label: t('category.subscription'), value: 'subscription' },
+  { label: t('category.asset'), value: 'asset' },
 ]
 
 const columns = [
   { title: t('category.name'), key: 'name' },
-  { title: t('category.type'), key: 'type', render: (row: Category) => h(NTag, { size: 'small' }, { default: () => row.type }) },
+  { title: t('category.type'), key: 'type', render: (row: Category) => h(NTag, { size: 'small' }, { default: () => row.type === 'subscription' ? t('category.subscription') : t('category.asset') }) },
   { title: t('category.color'), key: 'color', render: (row: Category) => h('div', { style: { width: '20px', height: '20px', borderRadius: '4px', background: row.color } }) },
   { title: t('common.edit'), key: 'actions', render: (row: Category) => h(NSpace, null, {
     default: () => [
@@ -64,8 +67,13 @@ const columns = [
 onMounted(() => fetchData())
 
 async function fetchData() {
-  const res = await listCategories()
-  categories.value = res.data
+  loading.value = true
+  try {
+    const res = await listCategories()
+    categories.value = res.data
+  } finally {
+    loading.value = false
+  }
 }
 
 function startEdit(cat: Category) {

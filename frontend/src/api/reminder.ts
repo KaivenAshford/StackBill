@@ -19,3 +19,7 @@ export function markReminderRead(id: number) {
 export function markAllRemindersRead() {
   return request.put('/reminders/read-all')
 }
+
+export function deleteReminder(id: number) {
+  return request.delete(`/reminders/${id}`)
+}

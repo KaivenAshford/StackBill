@@ -3,7 +3,7 @@
     <div class="auth-card">
       <h1>StackBill</h1>
       <p>{{ t('auth.register') }}</p>
-      <n-form ref="formRef" :model="form" :rules="rules" @submit.prevent="handleRegister">
+      <n-form ref="formRef" :model="form" :rules="rules" label-placement="top">
         <n-form-item :label="t('auth.username')" path="username">
           <n-input v-model:value="form.username" :placeholder="t('auth.username')" />
         </n-form-item>
@@ -13,7 +13,7 @@
         <n-form-item :label="t('auth.password')" path="password">
           <n-input v-model:value="form.password" type="password" :placeholder="t('auth.password')" />
         </n-form-item>
-        <n-button type="primary" block :loading="loading" attr-type="submit">
+        <n-button type="primary" block :loading="loading" @click="handleRegister">
           {{ t('auth.register') }}
         </n-button>
       </n-form>
@@ -35,16 +35,31 @@ const router = useRouter()
 const message = useMessage()
 const store = useUserStore()
 
+const formRef = ref<InstanceType<typeof NForm> | null>(null)
 const loading = ref(false)
 const form = reactive({ username: '', email: '', password: '' })
 
 const rules = {
-  username: { required: true, message: 'required', trigger: 'blur' },
-  email: { required: true, message: 'required', trigger: 'blur' },
-  password: { required: true, message: 'required', trigger: 'blur' },
+  username: [
+    { required: true, message: () => t('auth.usernameRequired'), trigger: 'blur' },
+    { min: 3, max: 50, message: () => t('auth.usernameMin'), trigger: 'blur' },
+  ],
+  email: [
+    { required: true, message: () => t('auth.emailRequired'), trigger: 'blur' },
+    { type: 'email' as const, message: () => t('auth.emailFormat'), trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: () => t('auth.passwordRequired'), trigger: 'blur' },
+    { min: 6, max: 50, message: () => t('auth.passwordMin'), trigger: 'blur' },
+  ],
 }
 
 async function handleRegister() {
+  try {
+    await formRef.value?.validate()
+  } catch {
+    return
+  }
   loading.value = true
   try {
     const res = await register(form.username, form.email, form.password)

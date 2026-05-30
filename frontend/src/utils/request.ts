@@ -19,17 +19,18 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => {
     const data = response.data
-    if (data.code !== 0) {
+    if (data.code !== undefined && data.code !== 0) {
       return Promise.reject(new Error(data.message || 'request failed'))
     }
     return data
   },
   (error) => {
+    const msg = error.response?.data?.message || error.message || 'request failed'
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
       window.location.href = '/login'
     }
-    return Promise.reject(error)
+    return Promise.reject(new Error(msg))
   },
 )
 

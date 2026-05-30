@@ -32,15 +32,21 @@ const router = useRouter()
 const message = useMessage()
 const store = useUserStore()
 
+const formRef = ref<InstanceType<typeof NForm> | null>(null)
 const loading = ref(false)
 const form = reactive({ username: '', password: '' })
 
 const rules = {
-  username: { required: true, message: 'required', trigger: 'blur' },
-  password: { required: true, message: 'required', trigger: 'blur' },
+  username: { required: true, message: () => t('auth.usernameRequired'), trigger: 'blur' },
+  password: { required: true, message: () => t('auth.passwordRequired'), trigger: 'blur' },
 }
 
 async function handleLogin() {
+  try {
+    await formRef.value?.validate()
+  } catch {
+    return
+  }
   loading.value = true
   try {
     const res = await login(form.username, form.password)
