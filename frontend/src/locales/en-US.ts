@@ -11,6 +11,7 @@ export default {
     noData: 'No data',
     success: 'Success',
     failed: 'Failed',
+    retry: 'Retry',
     confirmDelete: 'Are you sure? This action cannot be undone.',
   },
   auth: {
@@ -28,6 +29,14 @@ export default {
     emailFormat: 'Invalid email format',
     passwordRequired: 'Please enter password',
     passwordMin: 'Password must be at least 6 characters',
+    welcomeBack: 'Welcome Back',
+    createAccount: 'Create Account',
+    brandSlogan: 'Manage Your Digital Assets & Subscriptions',
+    loginSubtitle: 'Sign in to manage your subscriptions and assets',
+    registerSubtitle: 'Create an account to get started',
+    featureSubscription: 'Track all your subscriptions in one place',
+    featureAsset: 'Manage domains, servers, SSL and more',
+    featureReminder: 'Never miss a renewal or expiration',
   },
   nav: {
     dashboard: 'Dashboard',
@@ -64,6 +73,7 @@ export default {
     quarterly: 'Quarterly',
     yearly: 'Yearly',
     oneTime: 'One Time',
+    cycle: 'Custom',
     active: 'Active',
     paused: 'Paused',
     cancelled: 'Cancelled',
@@ -102,6 +112,10 @@ export default {
   reminder: {
     markAllRead: 'Mark All Read',
     markRead: 'Mark Read',
+    unread: 'Unread Reminders',
+    typeSubscriptionRenewal: 'Subscription Renewal',
+    typeAssetExpiration: 'Asset Expiration',
+    typeServiceWarning: 'Service Warning',
   },
   settings: {
     profile: 'Profile',
@@ -112,5 +126,10 @@ export default {
     newPassword: 'New Password',
     confirmPassword: 'Confirm Password',
     passwordMismatch: 'Passwords do not match',
+    appearance: 'Appearance',
+    language: 'Language',
+    light: 'Light',
+    dark: 'Dark',
+    theme: 'Theme',
   },
 }

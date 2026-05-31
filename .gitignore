@@ -1,0 +1,43 @@
+# ---- Go / Backend ----
+backend/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# ---- Node / Frontend ----
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+
+# ---- Environment ----
+.env
+.env.local
+.env.*.local
+
+# ---- IDE / Editor ----
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+
+# ---- Docker ----
+postgres-data/
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Claude Code ----
+.claude/

@@ -11,6 +11,7 @@ export default {
     noData: '暂无数据',
     success: '操作成功',
     failed: '操作失败',
+    retry: '重试',
     confirmDelete: '确定要删除吗？此操作不可撤销。',
   },
   auth: {
@@ -28,6 +29,14 @@ export default {
     emailFormat: '邮箱格式不正确',
     passwordRequired: '请输入密码',
     passwordMin: '密码至少 6 个字符',
+    welcomeBack: '欢迎回来',
+    createAccount: '创建账户',
+    brandSlogan: '管理你的数字资产与订阅',
+    loginSubtitle: '登录以管理你的订阅和资产',
+    registerSubtitle: '创建账户，即刻开始',
+    featureSubscription: '在一个地方追踪所有订阅',
+    featureAsset: '管理域名、服务器、SSL 证书等',
+    featureReminder: '不错过任何续费和到期提醒',
   },
   nav: {
     dashboard: '仪表盘',
@@ -64,6 +73,7 @@ export default {
     quarterly: '每季度',
     yearly: '每年',
     oneTime: '一次性',
+    cycle: '自定义',
     active: '活跃',
     paused: '已暂停',
     cancelled: '已取消',
@@ -102,6 +112,10 @@ export default {
   reminder: {
     markAllRead: '全部标记已读',
     markRead: '标记已读',
+    unread: '未读提醒',
+    typeSubscriptionRenewal: '订阅续费',
+    typeAssetExpiration: '资产到期',
+    typeServiceWarning: '服务警告',
   },
   settings: {
     profile: '个人资料',
@@ -112,5 +126,10 @@ export default {
     newPassword: '新密码',
     confirmPassword: '确认密码',
     passwordMismatch: '两次密码不一致',
+    appearance: '外观设置',
+    language: '语言',
+    light: '浅色',
+    dark: '深色',
+    theme: '主题',
   },
 }

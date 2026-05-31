@@ -1,24 +1,75 @@
 <template>
-  <div>
+  <div class="detail-page">
     <n-page-header @back="$router.back()" :title="asset?.name || ''">
       <template #extra>
-        <n-space>
-          <n-button @click="$router.push(`/assets/${id}/edit`)">{{ t('common.edit') }}</n-button>
-          <n-button type="error" @click="confirmDelete">{{ t('common.delete') }}</n-button>
+        <n-space v-if="asset">
+          <n-button @click="$router.push(`/assets/${id}/edit`)">
+            <template #icon>
+              <Pencil :size="14" :stroke-width="1.5" />
+            </template>
+            {{ t('common.edit') }}
+          </n-button>
+          <n-button type="error" @click="confirmDelete">
+            <template #icon>
+              <Trash2 :size="14" :stroke-width="1.5" />
+            </template>
+            {{ t('common.delete') }}
+          </n-button>
         </n-space>
       </template>
     </n-page-header>
-    <n-descriptions bordered :column="2" style="margin-top:16px;" v-if="asset">
-      <n-descriptions-item :label="t('asset.type')">{{ typeLabel(asset.asset_type) }}</n-descriptions-item>
-      <n-descriptions-item :label="t('asset.provider')">{{ asset.provider || '-' }}</n-descriptions-item>
-      <n-descriptions-item :label="t('asset.costAmount')">{{ formatAmount(asset.cost_amount, asset.cost_currency) }}</n-descriptions-item>
-      <n-descriptions-item :label="t('asset.status')">
-        <n-tag :type="statusType(asset.status)" size="small">{{ statusLabel(asset.status) }}</n-tag>
-      </n-descriptions-item>
-      <n-descriptions-item :label="t('asset.expireDate')">{{ asset.expire_date || '-' }}</n-descriptions-item>
-      <n-descriptions-item :label="t('asset.url')" :span="2">{{ asset.url || '-' }}</n-descriptions-item>
-      <n-descriptions-item :label="t('asset.remark')" :span="2">{{ asset.remark || '-' }}</n-descriptions-item>
-    </n-descriptions>
+
+    <!-- Loading state -->
+    <div v-if="loading" class="detail-card section-gap">
+      <div v-for="i in 6" :key="i" class="detail-row">
+        <div class="skeleton-shimmer" style="width:80px;height:12px;border-radius:4px;"></div>
+        <div class="skeleton-shimmer" style="width:120px;height:14px;border-radius:4px;"></div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <n-result v-else-if="error" status="error" :title="t('common.failed')" :description="error" class="section-gap">
+      <template #footer>
+        <n-button @click="fetchData">{{ t('common.retry') || 'Retry' }}</n-button>
+      </template>
+    </n-result>
+
+    <!-- Data -->
+    <div v-else-if="asset" class="detail-grid section-gap">
+      <div class="detail-card">
+        <div class="detail-row">
+          <span class="detail-label">{{ t('asset.type') }}</span>
+          <n-tag size="small" round>{{ typeLabel(asset.asset_type) }}</n-tag>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">{{ t('asset.provider') }}</span>
+          <span class="detail-value">{{ asset.provider || '-' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">{{ t('asset.costAmount') }}</span>
+          <span class="detail-value detail-value--amount">{{ formatAmount(asset.cost_amount, asset.cost_currency) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">{{ t('asset.status') }}</span>
+          <n-tag :type="statusType(asset.status)" size="small" round>{{ statusLabel(asset.status) }}</n-tag>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">{{ t('asset.expireDate') }}</span>
+          <span class="detail-value">{{ asset.expire_date || '-' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">{{ t('asset.url') }}</span>
+          <span class="detail-value">
+            <a v-if="asset.url" :href="asset.url" target="_blank" rel="noopener noreferrer" class="detail-link">{{ asset.url }}</a>
+            <template v-else>-</template>
+          </span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">{{ t('asset.remark') }}</span>
+          <span class="detail-value">{{ asset.remark || '-' }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -26,31 +77,39 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { NPageHeader, NDescriptions, NDescriptionsItem, NButton, NTag, NSpace, useMessage, useDialog } from 'naive-ui'
+import { NPageHeader, NButton, NTag, NSpace, NResult, useMessage, useDialog } from 'naive-ui'
+import { Pencil, Trash2 } from '@lucide/vue'
 import { getAsset, deleteAsset } from '@/api/asset'
 import { formatAmount } from '@/utils/currency'
+import { useAssetLabels } from '@/utils/mappings'
 import type { Asset } from '@/types'
+import { useAssetStore } from '@/stores/asset'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 const dialog = useDialog()
+const { typeLabel, statusLabel, statusType } = useAssetLabels()
 const id = Number(route.params.id)
 const asset = ref<Asset | null>(null)
+const loading = ref(true)
+const error = ref('')
 
-const typeMap: Record<string, string> = { domain: 'asset.domain', server: 'asset.server', docker_service: 'asset.dockerService', ssl_certificate: 'asset.sslCertificate', api_key: 'asset.apiKey', repository: 'asset.repository', other: 'asset.other' }
-const statusMap: Record<string, string> = { active: 'asset.active', inactive: 'asset.inactive', expired: 'asset.expired', warning: 'asset.warning' }
-const statusTypeMap: Record<string, string> = { active: 'success', inactive: 'default', expired: 'error', warning: 'warning' }
+onMounted(() => fetchData())
 
-function typeLabel(v: string) { return t(typeMap[v] || v) }
-function statusLabel(v: string) { return t(statusMap[v] || v) }
-function statusType(v: string) { return statusTypeMap[v] || 'default' }
-
-onMounted(async () => {
-  const res = await getAsset(id)
-  asset.value = res.data
-})
+async function fetchData() {
+  loading.value = true
+  error.value = ''
+  try {
+    const res = await getAsset(id)
+    asset.value = res.data
+  } catch (e: unknown) {
+    error.value = (e as Error).message || t('common.failed')
+  } finally {
+    loading.value = false
+  }
+}
 
 function confirmDelete() {
   dialog.warning({
@@ -66,9 +125,90 @@ async function handleDelete() {
   try {
     await deleteAsset(id)
     message.success(t('common.success'))
+    useAssetStore().invalidate()
     router.push('/assets')
   } catch (e: unknown) {
     message.error((e as Error).message || t('common.failed'))
   }
 }
 </script>
+
+<style scoped>
+.detail-page {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.detail-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: border-color var(--transition-smooth);
+}
+
+.detail-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-md);
+  transition: background var(--transition-fast);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row:hover {
+  background: var(--gradient-card-accent);
+}
+
+.detail-label {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  text-align: right;
+  word-break: break-all;
+}
+
+.detail-value--amount {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.detail-link {
+  color: var(--color-accent);
+  word-break: break-all;
+  transition: color var(--transition-fast);
+}
+
+.detail-link:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  .detail-value {
+    text-align: left;
+  }
+}
+</style>

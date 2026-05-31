@@ -20,6 +20,8 @@ export const useUserStore = defineStore('user', () => {
     user.value = null
     token.value = ''
     localStorage.removeItem('token')
+    // Invalidate all cache stores on logout
+    invalidateAllCaches()
   }
 
   function isLoggedIn() {
@@ -38,3 +40,11 @@ export const useUserStore = defineStore('user', () => {
 
   return { user, token, setToken, setUser, logout, isLoggedIn, fetchUser }
 })
+
+function invalidateAllCaches() {
+  // Dynamic imports to avoid circular dependency
+  import('@/stores/dashboard').then(m => m.useDashboardStore().invalidate())
+  import('@/stores/category').then(m => m.useCategoryStore().invalidate())
+  import('@/stores/subscription').then(m => m.useSubscriptionStore().invalidate())
+  import('@/stores/asset').then(m => m.useAssetStore().invalidate())
+}
