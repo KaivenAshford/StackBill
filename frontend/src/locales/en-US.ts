@@ -116,6 +116,9 @@ export default {
     typeSubscriptionRenewal: 'Subscription Renewal',
     typeAssetExpiration: 'Asset Expiration',
     typeServiceWarning: 'Service Warning',
+    renewalContent: 'Renewal on {date}, amount {amount} {currency}',
+    expirationContent: 'Expiring on {date}',
+    warningContent: 'Status warning: {status}',
   },
   settings: {
     profile: 'Profile',

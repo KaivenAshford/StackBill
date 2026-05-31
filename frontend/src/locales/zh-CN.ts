@@ -116,6 +116,9 @@ export default {
     typeSubscriptionRenewal: '订阅续费',
     typeAssetExpiration: '资产到期',
     typeServiceWarning: '服务警告',
+    renewalContent: '将在 {date} 续费，金额 {amount} {currency}',
+    expirationContent: '将在 {date} 到期',
+    warningContent: '状态异常: {status}',
   },
   settings: {
     profile: '个人资料',

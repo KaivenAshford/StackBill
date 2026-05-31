@@ -6,6 +6,7 @@ import (
 
 	"github.com/kingqaquuu/stackbill/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ReminderRepository struct {
@@ -40,7 +41,33 @@ func (r *ReminderRepository) MarkRead(userID uint, targetType string, targetID u
 }
 
 func (r *ReminderRepository) MarkAllRead(userID uint, items []model.ReminderRead) error {
-	return r.db.Create(&items).Error
+	if len(items) == 0 {
+		return nil
+	}
+	return r.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&items).Error
+}
+
+func (r *ReminderRepository) GetDismissedKeys(userID uint) (map[string]bool, error) {
+	var dismissed []model.ReminderDismissed
+	if err := r.db.Where("user_id = ?", userID).Find(&dismissed).Error; err != nil {
+		return nil, err
+	}
+	keys := make(map[string]bool, len(dismissed))
+	for _, d := range dismissed {
+		key := fmt.Sprintf("%s-%d", d.TargetType, d.TargetID)
+		keys[key] = true
+	}
+	return keys, nil
+}
+
+func (r *ReminderRepository) Dismiss(userID uint, targetType string, targetID uint) error {
+	d := model.ReminderDismissed{
+		UserID:     userID,
+		TargetType: targetType,
+		TargetID:   targetID,
+	}
+	return r.db.Where("user_id = ? AND target_type = ? AND target_id = ?",
+		userID, targetType, targetID).FirstOrCreate(&d).Error
 }
 
 func (r *ReminderRepository) GetSubscriptionsRenewingSoon(userID uint, withinDays int) ([]model.Subscription, error) {

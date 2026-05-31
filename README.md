@@ -4,22 +4,23 @@
 
 ## 功能
 
-- 软件订阅管理（AI 工具、开发工具、云服务等）
-- 数字资产管理（域名、服务器、SSL 证书、API Key 等）
-- 分类管理
-- 到期提醒
-- 仪表盘统计
-- 多用户数据隔离
-- PC 端 + 移动端响应式界面
-- 国际化（zh-CN / en-US）
+- **订阅管理** — 管理软件订阅、AI 工具订阅、周期性支出，支持按分类/状态筛选
+- **数字资产管理** — 管理域名、服务器、Docker 服务、SSL 证书、API Key 等数字资产
+- **分类管理** — 自定义分类，系统为新用户初始化 8 个默认分类
+- **仪表盘** — 本月/年度支出统计、分类支出占比图表、即将续费与到期列表
+- **到期提醒** — 订阅续费提醒、资产到期提醒、异常资产警告
+- **多用户数据隔离** — 所有数据严格按用户隔离
+- **响应式界面** — PC 端侧边栏布局 + 移动端底部导航
+- **国际化** — 支持 zh-CN / en-US
+- **暗黑模式** — 支持浅色/深色主题切换
 
 ## 技术栈
 
-**后端:** Go / Gin / GORM / PostgreSQL / JWT
-
-**前端:** Vue 3 / Vite / TypeScript / Pinia / Naive UI / ECharts
-
-**部署:** Docker Compose
+| 层 | 技术 |
+|---|---|
+| 后端 | Go / Gin / GORM / PostgreSQL / JWT |
+| 前端 | Vue 3 / Vite / TypeScript / Pinia / Naive UI / ECharts |
+| 部署 | Docker Compose |
 
 ## 项目结构
 
@@ -35,25 +36,23 @@ StackBill/
 │   │   ├── model/           # 数据模型
 │   │   ├── repository/      # 数据访问层
 │   │   ├── router/          # 路由
-│   │   ├── service/         # 业务逻辑
-│   │   └── task/            # 定时任务
+│   │   └── service/         # 业务逻辑
 │   ├── pkg/
-│   │   ├── database/        # 数据库连接
+│   │   ├── database/        # 数据库连接与迁移
 │   │   └── response/        # 统一响应
-│   ├── migrations/          # 数据库迁移
-│   └── docs/                # API 文档
+│   └── migrations/          # SQL 迁移文件
 ├── frontend/                # Vue 3 前端
 │   ├── src/
 │   │   ├── api/             # API 请求
-│   │   ├── components/      # 组件
-│   │   ├── i18n/            # 国际化
-│   │   ├── layouts/         # 布局
-│   │   ├── locales/         # 语言文件
+│   │   ├── composables/     # 组合式函数
+│   │   ├── i18n/            # 国际化配置
+│   │   ├── layouts/         # 布局组件
+│   │   ├── locales/         # 语言文件（zh-CN / en-US）
 │   │   ├── router/          # 路由
-│   │   ├── stores/          # Pinia 状态
+│   │   ├── stores/          # Pinia 状态管理
 │   │   ├── types/           # TypeScript 类型
 │   │   ├── utils/           # 工具函数
-│   │   └── views/           # 页面
+│   │   └── views/           # 页面视图
 │   └── nginx.conf           # Nginx 配置
 ├── docker-compose.yml
 ├── .env.example
@@ -67,25 +66,34 @@ StackBill/
 
 ```bash
 cp .env.example .env
-# 编辑 .env 设置 JWT_SECRET
+# 编辑 .env 设置 JWT_SECRET 和数据库密码
 docker compose up -d
 ```
 
-访问 http://localhost
+访问 http://localhost 即可使用。
+
+服务包含三个容器：
+
+- **frontend** — Nginx 托管前端静态文件，反向代理 API 到后端
+- **backend** — Go API 服务
+- **postgres** — PostgreSQL 17 数据库
 
 ### 本地开发
 
-**后端:**
+**前提条件：** Go 1.24+、Node.js 20+、PostgreSQL 17
+
+**后端：**
 
 ```bash
 cd backend
-cp config.example.yaml config.yaml
+cp ../config.example.yaml config.yaml
 # 编辑 config.yaml 设置数据库连接
-# 需要本地运行 PostgreSQL
 go run ./cmd/server
 ```
 
-**前端:**
+后端默认启动在 `http://localhost:8080`，首次启动会通过 GORM AutoMigrate 自动创建数据库表。
+
+**前端：**
 
 ```bash
 cd frontend
@@ -93,13 +101,13 @@ npm install
 npm run dev
 ```
 
-访问 http://localhost:3000
+前端开发服务器默认启动在 `http://localhost:3000`，已配置 API 代理到后端。
 
-## API
+## API 概览
 
-所有接口前缀: `/api/v1`
+所有接口前缀：`/api/v1`
 
-统一返回格式:
+### 统一返回格式
 
 ```json
 {
@@ -109,12 +117,65 @@ npm run dev
 }
 ```
 
-## 后续开发
+### 分页格式
 
-1. 完成用户注册登录 API
-2. 完成订阅 CRUD
-3. 完成资产 CRUD
-4. 完成分类管理
-5. 完成提醒模块
-6. 完成仪表盘统计
-7. 移动端适配优化
+```json
+{
+  "items": [],
+  "total": 0,
+  "page": 1,
+  "page_size": 20
+}
+```
+
+### 接口列表
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | /auth/register | 用户注册 |
+| POST | /auth/login | 用户登录 |
+| GET | /auth/me | 获取当前用户 |
+| PUT | /users/profile | 修改资料 |
+| PUT | /users/password | 修改密码 |
+| GET | /dashboard | 仪表盘统计 |
+| GET/POST/PUT/DELETE | /categories | 分类 CRUD |
+| GET/POST/PUT/DELETE | /subscriptions | 订阅 CRUD |
+| GET/POST/PUT/DELETE | /assets | 资产 CRUD |
+| GET | /reminders | 提醒列表 |
+| PUT | /reminders/:id/read | 标记已读 |
+| PUT | /reminders/read-all | 全部已读 |
+| DELETE | /reminders/:id | 忽略提醒 |
+
+所有写操作需要 JWT 鉴权（`Authorization: Bearer <token>`）。
+
+## 配置
+
+### 环境变量（.env）
+
+| 变量 | 说明 | 默认值 |
+|---|---|---|
+| JWT_SECRET | JWT 签名密钥 | — |
+| DB_HOST | 数据库主机 | localhost |
+| DB_PORT | 数据库端口 | 5432 |
+| DB_USER | 数据库用户 | stackbill |
+| DB_PASSWORD | 数据库密码 | — |
+| DB_NAME | 数据库名称 | stackbill |
+| SERVER_PORT | 后端端口 | 8080 |
+
+### 配置文件（config.yaml）
+
+参考 `config.example.yaml`，支持服务器、数据库、JWT、日志等配置。环境变量会覆盖配置文件中的对应项。
+
+## 数据库迁移
+
+项目提供 SQL 迁移文件（`backend/migrations/`），同时开发环境支持 GORM AutoMigrate 自动建表。
+
+生产部署建议使用迁移工具（如 [golang-migrate](https://github.com/golang-migrate/migrate)）按序执行：
+
+```bash
+migrate -path backend/migrations -database "postgres://..." up
+```
+
+## License
+
+MIT

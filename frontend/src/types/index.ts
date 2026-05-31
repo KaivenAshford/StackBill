@@ -81,6 +81,10 @@ export interface Reminder {
   title: string
   content: string
   is_read: boolean
+  amount?: number | null
+  currency?: string
+  expire_date?: string
+  asset_status?: string
   created_at: string
   updated_at: string
 }

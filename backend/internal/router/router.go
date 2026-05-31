@@ -85,5 +85,6 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int) {
 		authorized.GET("/reminders", reminderHandler.List)
 		authorized.PUT("/reminders/:id/read", reminderHandler.MarkRead)
 		authorized.PUT("/reminders/read-all", reminderHandler.MarkAllRead)
+		authorized.DELETE("/reminders/:id", reminderHandler.Delete)
 	}
 }

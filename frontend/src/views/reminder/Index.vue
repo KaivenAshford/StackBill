@@ -24,7 +24,7 @@
               {{ remindTypeLabel((item as RealItem).remind_type) }}
             </n-tag>
           </div>
-          <p class="reminder-text">{{ item.content }}</p>
+          <p class="reminder-text">{{ item._skeleton ? '' : localizeContent((item as RealItem)) }}</p>
           <span class="reminder-date">{{ item.date }}</span>
         </div>
         <div v-if="!item._skeleton" class="reminder-actions">
@@ -95,6 +95,23 @@ function remindIcon(type: string) {
   if (type === 'subscription_renewal') return CreditCard
   if (type === 'asset_expiration') return Server
   return AlertTriangle
+}
+
+function localizeContent(r: RealItem): string {
+  if (r.remind_type === 'subscription_renewal' && r.amount != null) {
+    return t('reminder.renewalContent', {
+      date: r.remind_date,
+      amount: r.amount.toFixed(2),
+      currency: r.currency || '',
+    })
+  }
+  if (r.remind_type === 'asset_expiration' && r.expire_date) {
+    return t('reminder.expirationContent', { date: r.expire_date })
+  }
+  if (r.remind_type === 'service_warning' && r.asset_status) {
+    return t('reminder.warningContent', { status: r.asset_status })
+  }
+  return r.content
 }
 
 onMounted(() => fetchData())

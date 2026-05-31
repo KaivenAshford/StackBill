@@ -60,3 +60,17 @@ func (h *ReminderHandler) MarkAllRead(c *gin.Context) {
 	}
 	response.OK(c, nil)
 }
+
+func (h *ReminderHandler) Delete(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		response.Fail(c, 400, 40001, "invalid id")
+		return
+	}
+	if err := h.svc.Dismiss(userID, uint(id)); err != nil {
+		handleServiceError(c, err)
+		return
+	}
+	response.OK(c, nil)
+}

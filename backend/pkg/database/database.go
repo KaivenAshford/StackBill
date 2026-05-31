@@ -39,5 +39,6 @@ func AutoMigrate() error {
 		&model.Asset{},
 		&model.Reminder{},
 		&model.ReminderRead{},
+		&model.ReminderDismissed{},
 	)
 }
