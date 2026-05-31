@@ -113,4 +113,4 @@ Implementation aggregates calls to existing services/repos.
 ```
 
 PC: 4 stat cards on top, 2 columns below (chart left, lists right).
-Mobile: stack everything vertically.
+Mobile layout is out of scope for the current plan and should be designed only when requested.
