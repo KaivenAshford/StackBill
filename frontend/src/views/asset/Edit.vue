@@ -12,6 +12,9 @@
         <n-form-item :label="t('asset.provider')">
           <n-input v-model:value="form.provider" :placeholder="t('asset.provider')" />
         </n-form-item>
+        <n-form-item :label="t('asset.identifier')">
+          <n-input v-model:value="form.identifier" :placeholder="t('asset.identifier')" />
+        </n-form-item>
         <n-form-item :label="t('asset.costAmount')">
           <div class="currency-row">
             <n-select v-model:value="form.cost_currency" :options="currencyOptions" class="currency-select" />
@@ -26,6 +29,12 @@
         </n-form-item>
         <n-form-item :label="t('asset.url')">
           <n-input v-model:value="form.url" :placeholder="t('asset.url')" />
+        </n-form-item>
+        <n-form-item :label="t('asset.linkedSubscription')">
+          <n-select v-model:value="form.subscription_id" :options="subscriptionOptions" clearable :placeholder="t('asset.noLinkedSubscription')" />
+        </n-form-item>
+        <n-form-item :label="t('asset.description')">
+          <n-input v-model:value="form.description" type="textarea" :rows="3" :placeholder="t('asset.description')" />
         </n-form-item>
         <n-form-item :label="t('asset.remark')">
           <n-input v-model:value="form.remark" type="textarea" :rows="3" :placeholder="t('asset.remark')" />
@@ -45,6 +54,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NForm, NFormItem, NInput, NInputNumber, NSelect, NDatePicker, NButton, useMessage } from 'naive-ui'
 import { getAsset, createAsset, updateAsset } from '@/api/asset'
+import { listSubscriptions } from '@/api/subscription'
 import { currencyOptions } from '@/utils/currency'
 import { useAssetStore } from '@/stores/asset'
 
@@ -67,11 +77,14 @@ const form = reactive({
   name: '',
   asset_type: 'domain',
   provider: '',
+  identifier: '',
   cost_amount: 0,
   cost_currency: 'CNY',
   status: 'active',
   expire_date: null as string | null,
   url: '',
+  subscription_id: null as number | null,
+  description: '',
   remark: '',
 })
 
@@ -96,18 +109,27 @@ const statusOptions = [
   { label: () => t('asset.warning'), value: 'warning' },
 ]
 
+const subscriptionOptions = ref<{ label: string; value: number }[]>([])
+
 onMounted(async () => {
+  const subRes = await listSubscriptions({ page: 1, page_size: 200 })
+  const items = (subRes.data as any)?.items || []
+  subscriptionOptions.value = items.map((s: any) => ({ label: s.name, value: s.id }))
+
   if (isEdit.value) {
     const res = await getAsset(id)
     const a = res.data
     form.name = a.name
     form.asset_type = a.asset_type
     form.provider = a.provider
+    form.identifier = a.identifier
     form.cost_amount = a.cost_amount
     form.cost_currency = a.cost_currency
     form.status = a.status
     form.expire_date = a.expire_date
     form.url = a.url
+    form.subscription_id = a.subscription_id || null
+    form.description = a.description
     form.remark = a.remark
   }
 })
