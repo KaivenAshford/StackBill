@@ -29,6 +29,7 @@ func NewSubscriptionHandler(svc *service.SubscriptionService) *SubscriptionHandl
 // @Param category_id query int false "Filter by category ID"
 // @Param status query string false "Filter by status (active, paused, cancelled, expired)"
 // @Param upcoming_renewal query bool false "Filter upcoming renewals only"
+// @Param keyword query string false "Search by name"
 // @Success 200 {object} response.Response{data=response.PageResult{items=[]dto.SubscriptionResponse}}
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response

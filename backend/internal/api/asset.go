@@ -29,6 +29,7 @@ func NewAssetHandler(svc *service.AssetService) *AssetHandler {
 // @Param asset_type query string false "Filter by asset type (domain, server, docker_service, ssl_certificate, api_key, repository, other)"
 // @Param status query string false "Filter by status (active, inactive, expired, warning)"
 // @Param expiring_days query int false "Filter assets expiring within N days"
+// @Param keyword query string false "Search by name"
 // @Success 200 {object} response.Response{data=response.PageResult{items=[]dto.AssetResponse}}
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response
