@@ -72,6 +72,10 @@ func (s *UserService) UpdatePassword(userID uint, req *dto.UpdatePasswordRequest
 		return NewServiceError(400, ErrCodeIncorrectPassword, "incorrect old password")
 	}
 
+	if req.NewPassword != req.ConfirmPassword {
+		return NewServiceError(400, ErrCodePasswordMismatch, "new password and confirmation do not match")
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err

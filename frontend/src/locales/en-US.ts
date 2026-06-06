@@ -155,6 +155,7 @@ export default {
     emailInvalid: 'Invalid email format',
     passwordRequired: 'Password must be 6-50 characters',
     credentialsRequired: 'Username and password are required',
+    passwordMismatch: 'New password and confirmation do not match',
     unauthorized: 'Unauthorized, please login again',
     invalidCredentials: 'Invalid username or password',
     forbidden: 'Access denied',

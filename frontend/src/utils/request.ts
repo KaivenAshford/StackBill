@@ -10,6 +10,7 @@ const ERROR_CODE_I18N_MAP: Record<number, string> = {
   40005: 'errors.emailInvalid',
   40006: 'errors.passwordRequired',
   40007: 'errors.credentialsRequired',
+  40008: 'errors.passwordMismatch',
   40100: 'errors.unauthorized',
   40101: 'errors.invalidCredentials',
   40301: 'errors.forbidden',

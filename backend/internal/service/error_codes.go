@@ -5,6 +5,7 @@ const (
 	ErrCodeInvalidParams      = 40001
 	ErrCodeInvalidReminderID  = 40002
 	ErrCodeIncorrectPassword  = 40003
+	ErrCodePasswordMismatch   = 40008
 	ErrCodeUsernameRequired   = 40004
 	ErrCodeEmailInvalid       = 40005
 	ErrCodePasswordRequired   = 40006

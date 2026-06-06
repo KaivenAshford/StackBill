@@ -155,6 +155,7 @@ export default {
     emailInvalid: '邮箱格式不正确',
     passwordRequired: '密码需 6-50 个字符',
     credentialsRequired: '用户名和密码不能为空',
+    passwordMismatch: '两次输入的新密码不一致',
     unauthorized: '未授权，请重新登录',
     invalidCredentials: '用户名或密码错误',
     forbidden: '无权访问',
