@@ -30,6 +30,7 @@
             <span class="stat-label">{{ t('dashboard.monthlyExpense') }}</span>
             <span class="stat-value">{{ formatAmount(stats?.monthly_expense || 0, 'CNY') }}</span>
           </div>
+          <span class="stat-badge">{{ t('dashboard.monthlyExpense').split(' ')[0] }}</span>
         </div>
         <div class="stat-card stat-card--info stagger-2">
           <div class="stat-card-bg"></div>
@@ -40,6 +41,7 @@
             <span class="stat-label">{{ t('dashboard.yearlyExpense') }}</span>
             <span class="stat-value">{{ formatAmount(stats?.yearly_expense || 0, 'CNY') }}</span>
           </div>
+          <span class="stat-badge">{{ t('dashboard.yearlyExpense').split(' ')[0] }}</span>
         </div>
         <div class="stat-card stat-card--accent stagger-3">
           <div class="stat-card-bg"></div>
@@ -152,8 +154,13 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { NTag, NEmpty } from 'naive-ui'
 import { TrendingUp, BarChart3, CreditCard, Package, AlertTriangle, Clock } from '@lucide/vue'
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { PieChart } from 'echarts/charts'
+import { TooltipComponent, LegendComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
 import { type DashboardData } from '@/api/dashboard'
+
+echarts.use([PieChart, TooltipComponent, LegendComponent, CanvasRenderer])
 import { useDashboardStore } from '@/stores/dashboard'
 import { formatAmount } from '@/utils/currency'
 import { useAssetLabels } from '@/utils/mappings'
@@ -368,6 +375,17 @@ function renderChart() {
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
   line-height: 1.2;
+}
+
+.stat-badge {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  opacity: 0.6;
 }
 
 /* ---- Section Grid ---- */
