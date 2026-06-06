@@ -3,17 +3,19 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kingqaquuu/stackbill/internal/api"
+	"github.com/kingqaquuu/stackbill/internal/config"
 	"github.com/kingqaquuu/stackbill/internal/middleware"
 	"github.com/kingqaquuu/stackbill/internal/repository"
 	"github.com/kingqaquuu/stackbill/internal/service"
+	"github.com/kingqaquuu/stackbill/internal/task"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/kingqaquuu/stackbill/docs"
 	"gorm.io/gorm"
 )
 
-func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, corsOrigins []string) {
-	r.Use(middleware.CORSMiddleware(corsOrigins))
+func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cfg *config.Config) {
+	r.Use(middleware.CORSMiddleware(cfg.CORS.AllowedOrigins))
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -23,6 +25,8 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cor
 	subscriptionRepo := repository.NewSubscriptionRepository(db)
 	assetRepo := repository.NewAssetRepository(db)
 	reminderRepo := repository.NewReminderRepository(db)
+	notificationRepo := repository.NewNotificationRepository(db)
+	webhookRepo := repository.NewWebhookRepository(db)
 
 	// Services
 	authService := service.NewAuthService(userRepo, categoryRepo, jwtSecret, jwtExpireHours)
@@ -34,6 +38,8 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cor
 	dashboardService := service.NewDashboardService(subscriptionRepo, assetRepo, reminderRepo, categoryRepo, subscriptionService)
 	exportService := service.NewExportService(subscriptionRepo, assetRepo)
 	importService := service.NewImportService(subscriptionRepo, assetRepo)
+	notificationService := service.NewNotificationService(notificationRepo)
+	webhookService := service.NewWebhookService(webhookRepo)
 
 	// Handlers
 	authHandler := api.NewAuthHandler(authService, userService)
@@ -45,6 +51,12 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cor
 	dashboardHandler := api.NewDashboardHandler(dashboardService)
 	exportHandler := api.NewExportHandler(exportService)
 	importHandler := api.NewImportHandler(importService)
+	notificationHandler := api.NewNotificationHandler(notificationService)
+	webhookHandler := api.NewWebhookHandler(webhookService)
+
+	// Start email reminder scheduler
+	scheduler := task.NewScheduler(notificationRepo, subscriptionRepo, assetRepo, userRepo, cfg.SMTP)
+	scheduler.Start()
 
 	apiGroup := r.Group("/api/v1")
 	{
@@ -99,5 +111,15 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cor
 		authorized.PUT("/reminders/:id/read", reminderHandler.MarkRead)
 		authorized.PUT("/reminders/read-all", reminderHandler.MarkAllRead)
 		authorized.DELETE("/reminders/:id", reminderHandler.Delete)
+
+		// Notification Settings
+		authorized.GET("/notification-settings", notificationHandler.GetNotificationSetting)
+		authorized.PUT("/notification-settings", notificationHandler.UpdateNotificationSetting)
+
+		// Webhooks
+		authorized.GET("/webhooks", webhookHandler.List)
+		authorized.POST("/webhooks", webhookHandler.Create)
+		authorized.PUT("/webhooks/:id", webhookHandler.Update)
+		authorized.DELETE("/webhooks/:id", webhookHandler.Delete)
 	}
 }
