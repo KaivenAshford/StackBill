@@ -71,6 +71,26 @@ func (s *ReminderService) List(userID uint, query *dto.ReminderListQuery) (*resp
 		})
 	}
 
+	readKeys, _ := s.repo.GetReadKeys(userID)
+	for i := range reminders {
+		key := fmt.Sprintf("%s-%d", reminders[i].TargetType, reminders[i].TargetID)
+		if readKeys[key] {
+			reminders[i].IsRead = true
+		}
+	}
+
+	dismissedKeys, _ := s.repo.GetDismissedKeys(userID)
+	if len(dismissedKeys) > 0 {
+		filtered := make([]dto.ReminderResponse, 0, len(reminders))
+		for _, r := range reminders {
+			key := fmt.Sprintf("%s-%d", r.TargetType, r.TargetID)
+			if !dismissedKeys[key] {
+				filtered = append(filtered, r)
+			}
+		}
+		reminders = filtered
+	}
+
 	if query.Type != "" {
 		filtered := make([]dto.ReminderResponse, 0)
 		for _, r := range reminders {
@@ -85,18 +105,6 @@ func (s *ReminderService) List(userID uint, query *dto.ReminderListQuery) (*resp
 		filtered := make([]dto.ReminderResponse, 0)
 		for _, r := range reminders {
 			if r.IsRead == *query.IsRead {
-				filtered = append(filtered, r)
-			}
-		}
-		reminders = filtered
-	}
-
-	dismissedKeys, _ := s.repo.GetDismissedKeys(userID)
-	if len(dismissedKeys) > 0 {
-		filtered := make([]dto.ReminderResponse, 0, len(reminders))
-		for _, r := range reminders {
-			key := fmt.Sprintf("%s-%d", r.TargetType, r.TargetID)
-			if !dismissedKeys[key] {
 				filtered = append(filtered, r)
 			}
 		}
