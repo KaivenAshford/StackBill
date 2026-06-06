@@ -37,10 +37,10 @@ StackBill/
 │   │   ├── repository/      # 数据访问层
 │   │   ├── router/          # 路由
 │   │   └── service/         # 业务逻辑
+│   ├── docs/                # Swagger 生成的 API 文档
 │   ├── pkg/
 │   │   ├── database/        # 数据库连接与迁移
 │   │   └── response/        # 统一响应
-│   └── migrations/          # SQL 迁移文件
 ├── frontend/                # Vue 3 前端
 │   ├── src/
 │   │   ├── api/             # API 请求
@@ -107,6 +107,8 @@ npm run dev
 
 所有接口前缀：`/api/v1`
 
+启动服务后访问 **http://localhost/swagger/index.html** 查看完整的 Swagger API 文档。
+
 ### 统一返回格式
 
 ```json
@@ -141,6 +143,7 @@ npm run dev
 | GET/POST/PUT/DELETE | /categories | 分类 CRUD |
 | GET/POST/PUT/DELETE | /subscriptions | 订阅 CRUD |
 | GET/POST/PUT/DELETE | /assets | 资产 CRUD |
+| GET | /health | 健康检查 |
 | GET | /reminders | 提醒列表 |
 | PUT | /reminders/:id/read | 标记已读 |
 | PUT | /reminders/read-all | 全部已读 |
@@ -168,13 +171,7 @@ npm run dev
 
 ## 数据库迁移
 
-项目提供 SQL 迁移文件（`backend/migrations/`），同时开发环境支持 GORM AutoMigrate 自动建表。
-
-生产部署建议使用迁移工具（如 [golang-migrate](https://github.com/golang-migrate/migrate)）按序执行：
-
-```bash
-migrate -path backend/migrations -database "postgres://..." up
-```
+项目使用 GORM AutoMigrate，后端启动时自动创建和更新数据库表结构，无需手动执行迁移。
 
 ## License
 
