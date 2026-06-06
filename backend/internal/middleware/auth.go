@@ -66,11 +66,21 @@ func JWTAuth(secret string) gin.HandlerFunc {
 	}
 }
 
-func CORSMiddleware() gin.HandlerFunc {
+func CORSMiddleware(allowedOrigins []string) gin.HandlerFunc {
+	originsMap := make(map[string]bool, len(allowedOrigins))
+	for _, o := range allowedOrigins {
+		originsMap[o] = true
+	}
+	allowAll := len(allowedOrigins) == 0
+
 	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
+		origin := c.GetHeader("Origin")
+		if allowAll || originsMap[origin] {
+			c.Header("Access-Control-Allow-Origin", origin)
+		}
 		c.Header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin,Content-Type,Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Max-Age", "86400")
 
 		if c.Request.Method == "OPTIONS" {

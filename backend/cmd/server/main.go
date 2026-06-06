@@ -12,36 +12,42 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kingqaquuu/stackbill/internal/config"
 	"github.com/kingqaquuu/stackbill/internal/router"
 	"github.com/kingqaquuu/stackbill/pkg/database"
+	"github.com/kingqaquuu/stackbill/pkg/logger"
 )
 
 func main() {
 	cfg, err := config.Load("config.yaml")
 	if err != nil {
-		log.Fatalf("load config: %v", err)
+		slog.Error("load config failed", "error", err)
+		return
 	}
 
+	logger.Init(&cfg.Log)
+
 	if err := database.Init(&cfg.Database); err != nil {
-		log.Fatalf("init database: %v", err)
+		slog.Error("init database failed", "error", err)
+		return
 	}
 
 	if err := database.AutoMigrate(); err != nil {
-		log.Fatalf("auto migrate: %v", err)
+		slog.Error("auto migrate failed", "error", err)
+		return
 	}
 
 	gin.SetMode(cfg.Server.Mode)
 	r := gin.Default()
 
-	router.Setup(r, database.DB, cfg.JWT.Secret, cfg.JWT.ExpireHours)
+	router.Setup(r, database.DB, cfg.JWT.Secret, cfg.JWT.ExpireHours, cfg.CORS.AllowedOrigins)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
-	log.Printf("server starting on %s", addr)
+	slog.Info("server starting", "addr", addr)
 	if err := r.Run(addr); err != nil {
-		log.Fatalf("start server: %v", err)
+		slog.Error("start server failed", "error", err)
 	}
 }

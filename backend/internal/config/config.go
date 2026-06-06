@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -12,6 +13,7 @@ type Config struct {
 	Database DatabaseConfig `yaml:"database"`
 	JWT      JWTConfig      `yaml:"jwt"`
 	Log      LogConfig      `yaml:"log"`
+	CORS     CORSConfig     `yaml:"cors"`
 }
 
 type ServerConfig struct {
@@ -36,6 +38,10 @@ type JWTConfig struct {
 type LogConfig struct {
 	Level  string `yaml:"level"`
 	Format string `yaml:"format"`
+}
+
+type CORSConfig struct {
+	AllowedOrigins []string `yaml:"allowed_origins"`
 }
 
 func (d *DatabaseConfig) DSN() string {
@@ -82,5 +88,8 @@ func (c *Config) resolveEnv() {
 	}
 	if v := os.Getenv("SERVER_PORT"); v != "" {
 		fmt.Sscanf(v, "%d", &c.Server.Port)
+	}
+	if v := os.Getenv("CORS_ALLOWED_ORIGINS"); v != "" {
+		c.CORS.AllowedOrigins = strings.Split(v, ",")
 	}
 }

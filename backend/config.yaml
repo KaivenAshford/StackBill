@@ -17,3 +17,6 @@ jwt:
 log:
   level: debug
   format: text
+
+cors:
+  allowed_origins: []  # empty = allow all origins

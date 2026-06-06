@@ -12,8 +12,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int) {
-	r.Use(middleware.CORSMiddleware())
+func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, corsOrigins []string) {
+	r.Use(middleware.CORSMiddleware(corsOrigins))
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

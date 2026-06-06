@@ -17,3 +17,8 @@ jwt:
 log:
   level: info  # debug, info, warn, error
   format: json  # json, text
+
+cors:
+  allowed_origins:  # leave empty to allow all origins
+    - "http://localhost:5173"
+    - "http://localhost:3000"
