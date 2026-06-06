@@ -95,14 +95,19 @@ func (s *AuthService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 
 func (s *AuthService) initDefaultCategories(userID uint) {
 	categories := []model.Category{
+		// Subscription type
 		{UserID: userID, Name: "AI 工具", Type: "subscription", Color: "#7c3aed", Icon: "robot", SortOrder: 1},
 		{UserID: userID, Name: "开发工具", Type: "subscription", Color: "#2563eb", Icon: "code", SortOrder: 2},
 		{UserID: userID, Name: "云服务", Type: "subscription", Color: "#0891b2", Icon: "cloud", SortOrder: 3},
-		{UserID: userID, Name: "域名", Type: "subscription", Color: "#059669", Icon: "globe", SortOrder: 4},
-		{UserID: userID, Name: "服务器", Type: "subscription", Color: "#d97706", Icon: "server", SortOrder: 5},
-		{UserID: userID, Name: "娱乐", Type: "subscription", Color: "#dc2626", Icon: "game-controller", SortOrder: 6},
-		{UserID: userID, Name: "办公", Type: "subscription", Color: "#4f46e5", Icon: "briefcase", SortOrder: 7},
-		{UserID: userID, Name: "其他", Type: "subscription", Color: "#6b7280", Icon: "ellipsis", SortOrder: 8},
+		{UserID: userID, Name: "娱乐", Type: "subscription", Color: "#dc2626", Icon: "game-controller", SortOrder: 4},
+		{UserID: userID, Name: "办公", Type: "subscription", Color: "#4f46e5", Icon: "briefcase", SortOrder: 5},
+		{UserID: userID, Name: "其他", Type: "subscription", Color: "#6b7280", Icon: "ellipsis", SortOrder: 6},
+		// Asset type
+		{UserID: userID, Name: "域名", Type: "asset", Color: "#059669", Icon: "globe", SortOrder: 1},
+		{UserID: userID, Name: "服务器", Type: "asset", Color: "#d97706", Icon: "server", SortOrder: 2},
+		{UserID: userID, Name: "SSL 证书", Type: "asset", Color: "#7c3aed", Icon: "shield", SortOrder: 3},
+		{UserID: userID, Name: "API Key", Type: "asset", Color: "#2563eb", Icon: "key", SortOrder: 4},
+		{UserID: userID, Name: "其他", Type: "asset", Color: "#6b7280", Icon: "ellipsis", SortOrder: 5},
 	}
 	if err := s.categoryRepo.BatchCreate(categories); err != nil {
 		slog.Error("failed to init default categories", "user_id", userID, "error", err)
