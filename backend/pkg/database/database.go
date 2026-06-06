@@ -37,7 +37,6 @@ func AutoMigrate() error {
 		&model.Category{},
 		&model.Subscription{},
 		&model.Asset{},
-		&model.Reminder{},
 		&model.ReminderRead{},
 		&model.ReminderDismissed{},
 	)
