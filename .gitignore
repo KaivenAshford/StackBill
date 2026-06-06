@@ -19,6 +19,7 @@ frontend/*.local
 .env
 .env.local
 .env.*.local
+backend/config.yaml
 
 # ---- IDE / Editor ----
 .vscode/*
