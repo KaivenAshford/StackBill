@@ -38,6 +38,10 @@
     <div v-else-if="sub" class="detail-grid section-gap">
       <div class="detail-card">
         <div class="detail-row">
+          <span class="detail-label">{{ t('subscription.category') }}</span>
+          <span class="detail-value">{{ categoryName || '-' }}</span>
+        </div>
+        <div class="detail-row">
           <span class="detail-label">{{ t('subscription.amount') }}</span>
           <span class="detail-value detail-value--amount">{{ formatAmount(sub.amount, sub.currency) }}</span>
         </div>
@@ -70,12 +74,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NPageHeader, NButton, NTag, NSpace, NResult, useMessage, useDialog } from 'naive-ui'
 import { Pencil, Trash2 } from '@lucide/vue'
 import { getSubscription, deleteSubscription } from '@/api/subscription'
+import { listCategories } from '@/api/category'
 import { formatAmount } from '@/utils/currency'
 import { useSubscriptionLabels } from '@/utils/mappings'
 import type { Subscription } from '@/types'
@@ -91,6 +96,12 @@ const id = Number(route.params.id)
 const sub = ref<Subscription | null>(null)
 const loading = ref(true)
 const error = ref('')
+const categoryNames = ref<Record<number, string>>({})
+
+const categoryName = computed(() => {
+  if (!sub.value?.category_id) return ''
+  return categoryNames.value[sub.value.category_id] || `#${sub.value.category_id}`
+})
 
 onMounted(() => fetchData())
 
@@ -100,6 +111,10 @@ async function fetchData() {
   try {
     const res = await getSubscription(id)
     sub.value = res.data
+    const catRes = await listCategories()
+    const map: Record<number, string> = {}
+    ;(catRes.data as any[])?.forEach((c: any) => { map[c.id] = c.name })
+    categoryNames.value = map
   } catch (e: unknown) {
     error.value = (e as Error).message || t('common.failed')
   } finally {
