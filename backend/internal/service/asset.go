@@ -133,17 +133,30 @@ func (s *AssetService) Delete(userID uint, id uint) error {
 }
 
 func (s *AssetService) toResponse(asset *model.Asset) dto.AssetResponse {
+	return AssetToResponse(asset)
+}
+
+// AssetToResponse converts an Asset model to its DTO response.
+func AssetToResponse(asset *model.Asset) dto.AssetResponse {
+	return assetToResponse(asset)
+}
+
+func assetToResponse(asset *model.Asset) dto.AssetResponse {
 	var expireDate *string
 	if asset.ExpireDate != nil {
 		ed := asset.ExpireDate.Format("2006-01-02")
 		expireDate = &ed
+	}
+	identifier := asset.Identifier
+	if asset.AssetType == "api_key" && len(identifier) > 8 {
+		identifier = identifier[:4] + "****" + identifier[len(identifier)-4:]
 	}
 	return dto.AssetResponse{
 		ID:             asset.ID,
 		Name:           asset.Name,
 		AssetType:      asset.AssetType,
 		Provider:       asset.Provider,
-		Identifier:     asset.Identifier,
+		Identifier:     identifier,
 		URL:            asset.URL,
 		ExpireDate:     expireDate,
 		CostAmount:     asset.CostAmount,

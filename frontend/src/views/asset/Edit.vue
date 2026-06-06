@@ -13,7 +13,17 @@
           <n-input v-model:value="form.provider" :placeholder="t('asset.provider')" />
         </n-form-item>
         <n-form-item :label="t('asset.identifier')">
-          <n-input v-model:value="form.identifier" :placeholder="t('asset.identifier')" />
+          <n-input
+            v-model:value="form.identifier"
+            :placeholder="t('asset.identifier')"
+            :type="form.asset_type === 'api_key' && !showIdentifier ? 'password' : 'text'"
+          >
+            <template v-if="form.asset_type === 'api_key'" #suffix>
+              <n-button quaternary size="tiny" @click="showIdentifier = !showIdentifier">
+                {{ showIdentifier ? '🙈' : '👁' }}
+              </n-button>
+            </template>
+          </n-input>
         </n-form-item>
         <n-form-item :label="t('asset.costAmount')">
           <div class="currency-row">
@@ -67,6 +77,7 @@ const formRef = ref<InstanceType<typeof NForm> | null>(null)
 const id = Number(route.params.id)
 const isEdit = computed(() => !isNaN(id) && id > 0 && route.name === 'AssetEdit')
 const saving = ref(false)
+const showIdentifier = ref(false)
 const isMobile = ref(window.innerWidth <= 768)
 
 function onResize() { isMobile.value = window.innerWidth <= 768 }
