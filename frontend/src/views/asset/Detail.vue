@@ -65,6 +65,13 @@
           </span>
         </div>
         <div class="detail-row">
+          <span class="detail-label">{{ t('asset.linkedSubscription') }}</span>
+          <span class="detail-value">
+            <a v-if="asset.subscription_id" class="detail-link" @click="router.push(`/subscriptions/${asset.subscription_id}`)">{{ linkedSubscriptionName }}</a>
+            <template v-else>-</template>
+          </span>
+        </div>
+        <div class="detail-row">
           <span class="detail-label">{{ t('asset.remark') }}</span>
           <span class="detail-value">{{ asset.remark || '-' }}</span>
         </div>
@@ -74,12 +81,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NPageHeader, NButton, NTag, NSpace, NResult, useMessage, useDialog } from 'naive-ui'
 import { Pencil, Trash2 } from '@lucide/vue'
 import { getAsset, deleteAsset } from '@/api/asset'
+import { listSubscriptions } from '@/api/subscription'
 import { formatAmount } from '@/utils/currency'
 import { useAssetLabels } from '@/utils/mappings'
 import type { Asset } from '@/types'
@@ -95,6 +103,12 @@ const id = Number(route.params.id)
 const asset = ref<Asset | null>(null)
 const loading = ref(true)
 const error = ref('')
+const subscriptionNames = ref<Record<number, string>>({})
+
+const linkedSubscriptionName = computed(() => {
+  if (!asset.value?.subscription_id) return ''
+  return subscriptionNames.value[asset.value.subscription_id] || `#${asset.value.subscription_id}`
+})
 
 onMounted(() => fetchData())
 
@@ -104,6 +118,11 @@ async function fetchData() {
   try {
     const res = await getAsset(id)
     asset.value = res.data
+    const subRes = await listSubscriptions({ page: 1, page_size: 200 })
+    const items = (subRes.data as any)?.items || []
+    const map: Record<number, string> = {}
+    items.forEach((s: any) => { map[s.id] = s.name })
+    subscriptionNames.value = map
   } catch (e: unknown) {
     error.value = (e as Error).message || t('common.failed')
   } finally {

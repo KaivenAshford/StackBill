@@ -65,6 +65,7 @@ export interface Asset {
   cost_currency: string
   billing_cycle: string
   status: string
+  subscription_id: number
   description: string
   remark: string
   created_at: string
