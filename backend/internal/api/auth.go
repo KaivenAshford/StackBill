@@ -32,15 +32,19 @@ func NewAuthHandler(authService *service.AuthService, userService *service.UserS
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req dto.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		msg := "参数校验失败"
+		code := service.ErrCodeInvalidParams
+		msg := "Invalid parameters"
 		if strings.Contains(err.Error(), "Username") {
-			msg = "用户名需 3-50 个字符"
+			code = service.ErrCodeUsernameRequired
+			msg = "Username must be 3-50 characters"
 		} else if strings.Contains(err.Error(), "Email") {
-			msg = "邮箱格式不正确"
+			code = service.ErrCodeEmailInvalid
+			msg = "Invalid email format"
 		} else if strings.Contains(err.Error(), "Password") {
-			msg = "密码需 6-50 个字符"
+			code = service.ErrCodePasswordRequired
+			msg = "Password must be 6-50 characters"
 		}
-		response.Fail(c, 400, service.ErrCodeInvalidParams, msg)
+		response.Fail(c, 400, code, msg)
 		return
 	}
 
@@ -67,7 +71,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, service.ErrCodeInvalidParams, "用户名和密码不能为空")
+		response.Fail(c, 400, service.ErrCodeCredentialsRequired, "Username and password are required")
 		return
 	}
 
