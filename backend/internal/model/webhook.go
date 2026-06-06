@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 type Webhook struct {
 	Model
 	UserID  uint   `gorm:"index;not null" json:"user_id"`
