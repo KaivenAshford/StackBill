@@ -72,7 +72,7 @@ const columns = [
     render: (row: Subscription) => h('span', { style: 'font-family: var(--font-heading); font-weight: 600;' }, formatAmount(row.amount, row.currency)),
   },
   {
-    title: t('subscription.cycle'),
+    title: t('subscription.billingCycle'),
     key: 'billing_cycle',
     render: (row: Subscription) => cycleLabel(row.billing_cycle),
   },

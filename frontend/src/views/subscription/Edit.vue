@@ -12,7 +12,7 @@
             <n-input-number v-model:value="form.amount" :min="0" :precision="2" class="currency-amount" :placeholder="t('subscription.amount')" />
           </div>
         </n-form-item>
-        <n-form-item :label="t('subscription.cycle')" path="billing_cycle">
+        <n-form-item :label="t('subscription.billingCycle')" path="billing_cycle">
           <n-select v-model:value="form.billing_cycle" :options="cycleOptions" />
         </n-form-item>
         <n-form-item :label="t('subscription.status')" path="status">

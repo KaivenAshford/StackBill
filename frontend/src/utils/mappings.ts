@@ -12,7 +12,7 @@ export function useSubscriptionLabels() {
     quarterly: 'subscription.quarterly',
     yearly: 'subscription.yearly',
     one_time: 'subscription.oneTime',
-    custom: 'subscription.cycle',
+    custom: 'subscription.customCycle',
   }
 
   const statusMap: Record<string, string> = {

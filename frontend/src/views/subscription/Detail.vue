@@ -42,7 +42,7 @@
           <span class="detail-value detail-value--amount">{{ formatAmount(sub.amount, sub.currency) }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">{{ t('subscription.cycle') }}</span>
+          <span class="detail-label">{{ t('subscription.billingCycle') }}</span>
           <span class="detail-value">{{ cycleLabel(sub.billing_cycle) }}</span>
         </div>
         <div class="detail-row">

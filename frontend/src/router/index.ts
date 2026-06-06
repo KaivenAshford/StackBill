@@ -33,6 +33,7 @@ const router = createRouter({
         { path: 'categories', name: 'Categories', component: () => import('@/views/category/Index.vue') },
         { path: 'reminders', name: 'Reminders', component: () => import('@/views/reminder/Index.vue') },
         { path: 'settings', name: 'Settings', component: () => import('@/views/settings/Index.vue') },
+        { path: ':pathMatch(.*)*', name: 'NotFound', redirect: '/' },
       ],
     },
   ],
