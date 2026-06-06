@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/kingqaquuu/stackbill/internal/dto"
 	"github.com/kingqaquuu/stackbill/internal/middleware"
@@ -105,6 +105,6 @@ func (s *AuthService) initDefaultCategories(userID uint) {
 		{UserID: userID, Name: "其他", Type: "subscription", Color: "#6b7280", Icon: "ellipsis", SortOrder: 8},
 	}
 	if err := s.categoryRepo.BatchCreate(categories); err != nil {
-		log.Printf("failed to init default categories for user %d: %v", userID, err)
+		slog.Error("failed to init default categories", "user_id", userID, "error", err)
 	}
 }

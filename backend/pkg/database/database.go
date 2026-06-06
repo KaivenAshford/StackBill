@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/kingqaquuu/stackbill/internal/config"
 	"github.com/kingqaquuu/stackbill/internal/model"
@@ -27,7 +27,7 @@ func Init(cfg *config.DatabaseConfig) error {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 
-	log.Println("database connected")
+	slog.Info("database connected", "host", cfg.Host, "dbname", cfg.DBName)
 	return nil
 }
 
