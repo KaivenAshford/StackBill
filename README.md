@@ -171,7 +171,18 @@ npm run dev
 
 ## 数据库迁移
 
-项目使用 GORM AutoMigrate，后端启动时自动创建和更新数据库表结构，无需手动执行迁移。
+项目提供两种迁移方式：
+
+**自动迁移（开发/默认）：** 后端启动时通过 GORM AutoMigrate 自动创建和更新数据库表结构，无需手动操作。
+
+**手动迁移（生产推荐）：** 使用 `backend/migrations/` 目录下的 SQL 文件，配合 [golang-migrate](https://github.com/golang-migrate/migrate) 等工具执行版本化迁移：
+
+```bash
+# 示例：使用 golang-migrate CLI
+migrate -path backend/migrations -database "postgres://stackbill:stackbill_password@localhost:5432/stackbill?sslmode=disable" up
+```
+
+迁移文件命名规则：`{序号}_{描述}.up.sql`（执行） / `{序号}_{描述}.down.sql`（回滚）。
 
 ## License
 
