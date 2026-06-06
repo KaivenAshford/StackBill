@@ -6,6 +6,9 @@
         <n-form-item :label="t('subscription.name')" path="name">
           <n-input v-model:value="form.name" :placeholder="t('subscription.name')" />
         </n-form-item>
+        <n-form-item :label="t('subscription.category')" path="category_id">
+          <n-select v-model:value="form.category_id" :options="categoryOptions" clearable :placeholder="t('common.search')" />
+        </n-form-item>
         <n-form-item :label="t('subscription.amount')" path="amount">
           <div class="currency-row">
             <n-select v-model:value="form.currency" :options="currencyOptions" class="currency-select" />
@@ -20,6 +23,12 @@
         </n-form-item>
         <n-form-item :label="t('subscription.startDate')">
           <n-date-picker v-model:formatted-value="form.start_date" type="date" value-format="yyyy-MM-dd" clearable style="width: 100%;" />
+        </n-form-item>
+        <n-form-item :label="t('subscription.paymentMethod')">
+          <n-input v-model:value="form.payment_method" :placeholder="t('subscription.paymentMethod')" />
+        </n-form-item>
+        <n-form-item :label="t('subscription.autoRenew')">
+          <n-switch v-model:value="form.auto_renew" />
         </n-form-item>
         <n-form-item :label="t('subscription.url')">
           <n-input v-model:value="form.website_url" :placeholder="t('subscription.url')" />
@@ -40,10 +49,11 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { NForm, NFormItem, NInput, NInputNumber, NSelect, NDatePicker, NButton, useMessage } from 'naive-ui'
+import { NForm, NFormItem, NInput, NInputNumber, NSelect, NDatePicker, NButton, NSwitch, useMessage } from 'naive-ui'
 import { getSubscription, createSubscription, updateSubscription } from '@/api/subscription'
 import { currencyOptions } from '@/utils/currency'
 import { useSubscriptionStore } from '@/stores/subscription'
+import { useCategoryStore } from '@/stores/category'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -62,12 +72,15 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 
 const form = reactive({
   name: '',
+  category_id: null as number | null,
   amount: 0,
   currency: 'CNY',
   billing_cycle: 'monthly',
   billing_interval: 1,
   status: 'active',
   start_date: null as string | null,
+  payment_method: '',
+  auto_renew: true,
   website_url: '',
   remark: '',
 })
@@ -92,17 +105,28 @@ const statusOptions = [
   { label: () => t('subscription.expired'), value: 'expired' },
 ]
 
+const categoryStore = useCategoryStore()
+const categoryOptions = computed(() =>
+  categoryStore.categories
+    .filter(c => c.type === 'subscription')
+    .map(c => ({ label: c.name, value: c.id }))
+)
+
 onMounted(async () => {
+  await categoryStore.ensureLoaded('subscription')
   if (isEdit.value) {
     const res = await getSubscription(id)
     const s = res.data
     form.name = s.name
+    form.category_id = s.category_id
     form.amount = s.amount
     form.currency = s.currency
     form.billing_cycle = s.billing_cycle
     form.billing_interval = s.billing_interval
     form.status = s.status
     form.start_date = s.start_date
+    form.payment_method = s.payment_method
+    form.auto_renew = s.auto_renew
     form.website_url = s.website_url
     form.remark = s.remark
   }
