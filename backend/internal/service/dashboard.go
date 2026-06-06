@@ -1,8 +1,9 @@
 package service
 
 import (
+	"log/slog"
+
 	"github.com/kingqaquuu/stackbill/internal/dto"
-	"github.com/kingqaquuu/stackbill/internal/model"
 	"github.com/kingqaquuu/stackbill/internal/repository"
 )
 
@@ -31,39 +32,63 @@ func NewDashboardService(
 }
 
 func (s *DashboardService) GetDashboard(userID uint) (*dto.DashboardResponse, error) {
-	monthlyExpense, _ := s.subscriptionSvc.CalculateMonthlyExpense(userID)
-	yearlyExpense, _ := s.subscriptionSvc.CalculateYearlyExpense(userID)
+	monthlyExpense, err := s.subscriptionSvc.CalculateMonthlyExpense(userID)
+	if err != nil {
+		slog.Error("failed to calculate monthly expense", "user_id", userID, "error", err)
+	}
+	yearlyExpense, err := s.subscriptionSvc.CalculateYearlyExpense(userID)
+	if err != nil {
+		slog.Error("failed to calculate yearly expense", "user_id", userID, "error", err)
+	}
 
 	subCount := s.subscriptionRepo.CountByUserID(userID)
 	assetCount := s.assetRepo.CountByUserID(userID)
 
-	renewingSubs, _ := s.reminderRepo.GetSubscriptionsRenewingSoon(userID, 7)
-	expiringAssets, _ := s.reminderRepo.GetAssetsExpiringSoon(userID, 30)
-	warningAssets, _ := s.reminderRepo.GetWarningAssets(userID)
+	renewingSubs, err := s.reminderRepo.GetSubscriptionsRenewingSoon(userID, 7)
+	if err != nil {
+		slog.Error("failed to get renewing subscriptions", "user_id", userID, "error", err)
+	}
+	expiringAssets, err := s.reminderRepo.GetAssetsExpiringSoon(userID, 30)
+	if err != nil {
+		slog.Error("failed to get expiring assets", "user_id", userID, "error", err)
+	}
+	warningAssets, err := s.reminderRepo.GetWarningAssets(userID)
+	if err != nil {
+		slog.Error("failed to get warning assets", "user_id", userID, "error", err)
+	}
 
-	recentSubs, _ := s.subscriptionRepo.GetRecentByUserID(userID, 5)
-	recentAssets, _ := s.assetRepo.GetRecentByUserID(userID, 5)
+	recentSubs, err := s.subscriptionRepo.GetRecentByUserID(userID, 5)
+	if err != nil {
+		slog.Error("failed to get recent subscriptions", "user_id", userID, "error", err)
+	}
+	recentAssets, err := s.assetRepo.GetRecentByUserID(userID, 5)
+	if err != nil {
+		slog.Error("failed to get recent assets", "user_id", userID, "error", err)
+	}
 
-	categoryExpenseRows, _ := s.subscriptionRepo.GetCategoryExpense(userID)
+	categoryExpenseRows, err := s.subscriptionRepo.GetCategoryExpense(userID)
+	if err != nil {
+		slog.Error("failed to get category expense", "user_id", userID, "error", err)
+	}
 
 	recentSubResponses := make([]dto.SubscriptionResponse, len(recentSubs))
 	for i := range recentSubs {
-		recentSubResponses[i] = subToResponse(&recentSubs[i])
+		recentSubResponses[i] = SubscriptionToResponse(&recentSubs[i])
 	}
 
 	recentAssetResponses := make([]dto.AssetResponse, len(recentAssets))
 	for i := range recentAssets {
-		recentAssetResponses[i] = assetToResponse(&recentAssets[i])
+		recentAssetResponses[i] = AssetToResponse(&recentAssets[i])
 	}
 
 	renewalResponses := make([]dto.SubscriptionResponse, len(renewingSubs))
 	for i := range renewingSubs {
-		renewalResponses[i] = subToResponse(&renewingSubs[i])
+		renewalResponses[i] = SubscriptionToResponse(&renewingSubs[i])
 	}
 
 	expiringResponses := make([]dto.AssetResponse, len(expiringAssets))
 	for i := range expiringAssets {
-		expiringResponses[i] = assetToResponse(&expiringAssets[i])
+		expiringResponses[i] = AssetToResponse(&expiringAssets[i])
 	}
 
 	categoryExpense := make([]dto.CategoryExpenseItem, len(categoryExpenseRows))
@@ -90,60 +115,4 @@ func (s *DashboardService) GetDashboard(userID uint) (*dto.DashboardResponse, er
 		ExpiringAssetList:   expiringResponses,
 		CategoryExpense:     categoryExpense,
 	}, nil
-}
-
-func subToResponse(sub *model.Subscription) dto.SubscriptionResponse {
-	var nextPayment, startDate *string
-	if sub.NextPaymentDate != nil {
-		v := sub.NextPaymentDate.Format("2006-01-02")
-		nextPayment = &v
-	}
-	if sub.StartDate != nil {
-		v := sub.StartDate.Format("2006-01-02")
-		startDate = &v
-	}
-	return dto.SubscriptionResponse{
-		ID:              sub.ID,
-		Name:            sub.Name,
-		Description:     sub.Description,
-		CategoryID:      sub.CategoryID,
-		Amount:          sub.Amount,
-		Currency:        sub.Currency,
-		BillingCycle:    sub.BillingCycle,
-		BillingInterval: sub.BillingInterval,
-		NextPaymentDate: nextPayment,
-		StartDate:       startDate,
-		PaymentMethod:   sub.PaymentMethod,
-		AutoRenew:       sub.AutoRenew,
-		Status:          sub.Status,
-		WebsiteURL:      sub.WebsiteURL,
-		Remark:          sub.Remark,
-		CreatedAt:       sub.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:       sub.UpdatedAt.Format("2006-01-02 15:04:05"),
-	}
-}
-
-func assetToResponse(asset *model.Asset) dto.AssetResponse {
-	var expireDate *string
-	if asset.ExpireDate != nil {
-		ed := asset.ExpireDate.Format("2006-01-02")
-		expireDate = &ed
-	}
-	return dto.AssetResponse{
-		ID:           asset.ID,
-		Name:         asset.Name,
-		AssetType:    asset.AssetType,
-		Provider:     asset.Provider,
-		Identifier:   asset.Identifier,
-		URL:          asset.URL,
-		ExpireDate:   expireDate,
-		CostAmount:   asset.CostAmount,
-		CostCurrency: asset.CostCurrency,
-		BillingCycle: asset.BillingCycle,
-		Status:       asset.Status,
-		Description:  asset.Description,
-		Remark:       asset.Remark,
-		CreatedAt:    asset.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:    asset.UpdatedAt.Format("2006-01-02 15:04:05"),
-	}
 }

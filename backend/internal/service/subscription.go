@@ -250,6 +250,15 @@ func (s *SubscriptionService) addCycle(t time.Time, cycle string, interval int) 
 }
 
 func (s *SubscriptionService) toResponse(sub *model.Subscription) dto.SubscriptionResponse {
+	return subscriptionToResponse(sub)
+}
+
+// SubscriptionToResponse converts a Subscription model to its DTO response.
+func SubscriptionToResponse(sub *model.Subscription) dto.SubscriptionResponse {
+	return subscriptionToResponse(sub)
+}
+
+func subscriptionToResponse(sub *model.Subscription) dto.SubscriptionResponse {
 	var nextPayment, startDate *string
 	if sub.NextPaymentDate != nil {
 		v := sub.NextPaymentDate.Format("2006-01-02")
