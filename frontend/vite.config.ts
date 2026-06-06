@@ -21,11 +21,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'naive-ui': ['naive-ui'],
-          'echarts': ['echarts/core', 'echarts/charts', 'echarts/components', 'echarts/renderers'],
-          'vendor': ['vue', 'vue-router', 'pinia', 'axios', 'vue-i18n'],
-        } as Record<string, string[]>,
+        manualChunks(id) {
+          if (id.includes('naive-ui')) return 'naive-ui'
+          if (id.includes('echarts')) return 'echarts'
+          if (id.includes('node_modules/vue') || id.includes('node_modules/vue-router') || id.includes('node_modules/pinia') || id.includes('node_modules/axios') || id.includes('node_modules/vue-i18n')) return 'vendor'
+        },
       },
     },
   },
