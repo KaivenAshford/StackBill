@@ -39,5 +39,7 @@ func AutoMigrate() error {
 		&model.Asset{},
 		&model.ReminderRead{},
 		&model.ReminderDismissed{},
+		&model.NotificationSetting{},
+		&model.Webhook{},
 	)
 }

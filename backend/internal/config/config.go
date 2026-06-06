@@ -14,6 +14,7 @@ type Config struct {
 	JWT      JWTConfig      `yaml:"jwt"`
 	Log      LogConfig      `yaml:"log"`
 	CORS     CORSConfig     `yaml:"cors"`
+	SMTP     SMTPConfig     `yaml:"smtp"`
 }
 
 type ServerConfig struct {
@@ -42,6 +43,14 @@ type LogConfig struct {
 
 type CORSConfig struct {
 	AllowedOrigins []string `yaml:"allowed_origins"`
+}
+
+type SMTPConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	From     string `yaml:"from"`
 }
 
 func (d *DatabaseConfig) DSN() string {
@@ -91,5 +100,11 @@ func (c *Config) resolveEnv() {
 	}
 	if v := os.Getenv("CORS_ALLOWED_ORIGINS"); v != "" {
 		c.CORS.AllowedOrigins = strings.Split(v, ",")
+	}
+	if v := os.Getenv("SMTP_HOST"); v != "" {
+		c.SMTP.Host = v
+	}
+	if v := os.Getenv("SMTP_PASSWORD"); v != "" {
+		c.SMTP.Password = v
 	}
 }

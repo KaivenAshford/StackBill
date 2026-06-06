@@ -22,3 +22,10 @@ cors:
   allowed_origins:  # leave empty to allow all origins
     - "http://localhost:5173"
     - "http://localhost:3000"
+
+smtp:
+  host: ""
+  port: 587
+  user: ""
+  password: ""
+  from: ""

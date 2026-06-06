@@ -43,7 +43,7 @@ func main() {
 	gin.SetMode(cfg.Server.Mode)
 	r := gin.Default()
 
-	router.Setup(r, database.DB, cfg.JWT.Secret, cfg.JWT.ExpireHours, cfg.CORS.AllowedOrigins)
+	router.Setup(r, database.DB, cfg.JWT.Secret, cfg.JWT.ExpireHours, cfg)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 	slog.Info("server starting", "addr", addr)
