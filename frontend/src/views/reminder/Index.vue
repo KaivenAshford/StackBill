@@ -55,7 +55,7 @@ import type { Reminder } from '@/types'
 import { useDeferredLoading } from '@/composables/useDeferredLoading'
 
 interface SkeletonItem { _key: string; _skeleton: true; title: string; content: string; date: string }
-interface RealItem extends Reminder { _key: string; _skeleton: false }
+interface RealItem extends Reminder { _key: string; _skeleton: false; date: string }
 type DisplayItem = SkeletonItem | RealItem
 
 const SKELETON_COUNT = 4
@@ -81,7 +81,7 @@ const hasUnread = computed(() => items.value.some(i => !i.is_read))
 const displayItems = computed<DisplayItem[]>(() => {
   if (!initialized.value) return makeSkeletons()
   if (loading.value) return makeSkeletons()
-  return items.value.map(r => ({ ...r, _key: `rem-${r.id}`, _skeleton: false as const }))
+  return items.value.map(r => ({ ...r, _key: `rem-${r.id}`, _skeleton: false as const, date: r.remind_date || '' }))
 })
 
 const remindTypeMap: Record<string, string> = {

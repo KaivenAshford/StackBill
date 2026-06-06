@@ -12,7 +12,7 @@
 
     <!-- Single stable grid — skeleton or real cards share the same container -->
     <div class="category-grid" v-if="displayItems.length > 0">
-      <div v-for="(cat, idx) in displayItems" :key="cat._key" class="category-card" :class="{ 'category-card--skeleton': cat._skeleton }">
+      <div v-for="cat in displayItems" :key="cat._key" class="category-card" :class="{ 'category-card--skeleton': cat._skeleton }">
         <div class="category-color" :style="{ background: cat.color }"></div>
         <div class="category-info">
           <span class="category-name">{{ cat.name }}</span>

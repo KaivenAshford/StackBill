@@ -1,5 +1,7 @@
 import { useI18n } from 'vue-i18n'
 
+type TagType = 'info' | 'success' | 'warning' | 'error' | 'default' | 'primary'
+
 /**
  * Subscription label helpers — reactive with i18n locale changes.
  */
@@ -22,7 +24,7 @@ export function useSubscriptionLabels() {
     expired: 'subscription.expired',
   }
 
-  const statusTypeMap: Record<string, string> = {
+  const statusTypeMap: Record<string, TagType> = {
     active: 'success',
     paused: 'warning',
     cancelled: 'default',
@@ -31,7 +33,7 @@ export function useSubscriptionLabels() {
 
   function cycleLabel(v: string) { return t(cycleMap[v] || v) }
   function statusLabel(v: string) { return t(statusMap[v] || v) }
-  function statusType(v: string) { return statusTypeMap[v] || 'default' }
+  function statusType(v: string): TagType { return statusTypeMap[v] || 'default' }
 
   return { cycleMap, statusMap, statusTypeMap, cycleLabel, statusLabel, statusType }
 }
@@ -59,7 +61,7 @@ export function useAssetLabels() {
     warning: 'asset.warning',
   }
 
-  const statusTypeMap: Record<string, string> = {
+  const statusTypeMap: Record<string, TagType> = {
     active: 'success',
     inactive: 'default',
     expired: 'error',
@@ -68,7 +70,7 @@ export function useAssetLabels() {
 
   function typeLabel(v: string) { return t(typeMap[v] || v) }
   function statusLabel(v: string) { return t(statusMap[v] || v) }
-  function statusType(v: string) { return statusTypeMap[v] || 'default' }
+  function statusType(v: string): TagType { return statusTypeMap[v] || 'default' }
 
   return { typeMap, statusMap, statusTypeMap, typeLabel, statusLabel, statusType }
 }

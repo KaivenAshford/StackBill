@@ -43,7 +43,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { NForm, NFormItem, NInput, NInputNumber, NSelect, NDatePicker, NSpace, NButton, useMessage } from 'naive-ui'
+import { NForm, NFormItem, NInput, NInputNumber, NSelect, NDatePicker, NButton, useMessage } from 'naive-ui'
 import { getAsset, createAsset, updateAsset } from '@/api/asset'
 import { currencyOptions } from '@/utils/currency'
 import { useAssetStore } from '@/stores/asset'
