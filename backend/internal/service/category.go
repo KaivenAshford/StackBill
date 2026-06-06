@@ -33,12 +33,12 @@ func (s *CategoryService) GetByID(userID uint, id uint) (*dto.CategoryResponse, 
 	cat, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(404, ErrCodeNotFound,"category not found")
+			return nil, NewServiceError(404, ErrCodeNotFound, "category not found")
 		}
 		return nil, err
 	}
 	if cat.UserID != userID {
-		return nil, NewServiceError(403, ErrCodeForbidden,"forbidden")
+		return nil, NewServiceError(403, ErrCodeForbidden, "forbidden")
 	}
 	resp := s.toResponse(cat)
 	return &resp, nil
@@ -70,12 +70,12 @@ func (s *CategoryService) Update(userID uint, id uint, req *dto.UpdateCategoryRe
 	cat, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(404, ErrCodeNotFound,"category not found")
+			return nil, NewServiceError(404, ErrCodeNotFound, "category not found")
 		}
 		return nil, err
 	}
 	if cat.UserID != userID {
-		return nil, NewServiceError(403, ErrCodeForbidden,"forbidden")
+		return nil, NewServiceError(403, ErrCodeForbidden, "forbidden")
 	}
 
 	cat.Name = req.Name
@@ -95,12 +95,12 @@ func (s *CategoryService) Delete(userID uint, id uint) error {
 	cat, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return NewServiceError(404, ErrCodeNotFound,"category not found")
+			return NewServiceError(404, ErrCodeNotFound, "category not found")
 		}
 		return err
 	}
 	if cat.UserID != userID {
-		return NewServiceError(403, ErrCodeForbidden,"forbidden")
+		return NewServiceError(403, ErrCodeForbidden, "forbidden")
 	}
 	return s.repo.Delete(id)
 }

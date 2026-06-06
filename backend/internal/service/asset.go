@@ -35,12 +35,12 @@ func (s *AssetService) GetByID(userID uint, id uint) (*dto.AssetResponse, error)
 	asset, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(404, ErrCodeNotFound,"asset not found")
+			return nil, NewServiceError(404, ErrCodeNotFound, "asset not found")
 		}
 		return nil, err
 	}
 	if asset.UserID != userID {
-		return nil, NewServiceError(403, ErrCodeForbidden,"forbidden")
+		return nil, NewServiceError(403, ErrCodeForbidden, "forbidden")
 	}
 	resp := s.toResponse(asset)
 	return &resp, nil
@@ -79,12 +79,12 @@ func (s *AssetService) Update(userID uint, id uint, req *dto.UpdateAssetRequest)
 	asset, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(404, ErrCodeNotFound,"asset not found")
+			return nil, NewServiceError(404, ErrCodeNotFound, "asset not found")
 		}
 		return nil, err
 	}
 	if asset.UserID != userID {
-		return nil, NewServiceError(403, ErrCodeForbidden,"forbidden")
+		return nil, NewServiceError(403, ErrCodeForbidden, "forbidden")
 	}
 
 	if req.Name != "" {
@@ -120,12 +120,12 @@ func (s *AssetService) Delete(userID uint, id uint) error {
 	asset, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return NewServiceError(404, ErrCodeNotFound,"asset not found")
+			return NewServiceError(404, ErrCodeNotFound, "asset not found")
 		}
 		return err
 	}
 	if asset.UserID != userID {
-		return NewServiceError(403, ErrCodeForbidden,"forbidden")
+		return NewServiceError(403, ErrCodeForbidden, "forbidden")
 	}
 	return s.repo.Delete(id)
 }
