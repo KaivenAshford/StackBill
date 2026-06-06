@@ -18,6 +18,17 @@ func NewAuthHandler(authService *service.AuthService, userService *service.UserS
 	return &AuthHandler{authService: authService, userService: userService}
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Description Create a new user account with username, email, and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body dto.RegisterRequest true "Registration data"
+// @Success 200 {object} response.Response{data=dto.LoginResponse}
+// @Failure 400 {object} response.Response
+// @Failure 409 {object} response.Response
+// @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req dto.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -29,7 +40,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		} else if strings.Contains(err.Error(), "Password") {
 			msg = "密码需 6-50 个字符"
 		}
-		response.Fail(c, 400, 40001, msg)
+		response.Fail(c, 400, service.ErrCodeInvalidParams, msg)
 		return
 	}
 
@@ -42,10 +53,21 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	response.OK(c, resp)
 }
 
+// Login godoc
+// @Summary Login
+// @Description Authenticate user with username and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body dto.LoginRequest true "Login credentials"
+// @Success 200 {object} response.Response{data=dto.LoginResponse}
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, 40001, "用户名和密码不能为空")
+		response.Fail(c, 400, service.ErrCodeInvalidParams, "用户名和密码不能为空")
 		return
 	}
 
@@ -58,6 +80,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	response.OK(c, resp)
 }
 
+// GetCurrentUser godoc
+// @Summary Get current user
+// @Description Get the currently authenticated user's profile
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} response.Response{data=dto.UserResponse}
+// @Failure 401 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Router /auth/me [get]
 func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	resp, err := h.userService.GetCurrentUser(userID)

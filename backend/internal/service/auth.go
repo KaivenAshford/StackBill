@@ -30,13 +30,13 @@ func NewAuthService(userRepo *repository.UserRepository, categoryRepo *repositor
 
 func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.LoginResponse, error) {
 	if _, err := s.userRepo.FindByUsername(req.Username); err == nil {
-		return nil, NewServiceError(409, 40901, "username already exists")
+		return nil, NewServiceError(409, ErrCodeDuplicateUsername, "username already exists")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
 	if _, err := s.userRepo.FindByEmail(req.Email); err == nil {
-		return nil, NewServiceError(409, 40902, "email already exists")
+		return nil, NewServiceError(409, ErrCodeDuplicateEmail, "email already exists")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -73,13 +73,13 @@ func (s *AuthService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 	user, err := s.userRepo.FindByUsername(req.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(401, 40101, "invalid credentials")
+			return nil, NewServiceError(401, ErrCodeInvalidCredentials, "invalid credentials")
 		}
 		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return nil, NewServiceError(401, 40101, "invalid credentials")
+		return nil, NewServiceError(401, ErrCodeInvalidCredentials, "invalid credentials")
 	}
 
 	token, err := middleware.GenerateToken(user.ID, user.Username, s.jwtSecret, s.jwtExpire)

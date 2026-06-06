@@ -119,7 +119,7 @@ func (s *ReminderService) List(userID uint, query *dto.ReminderListQuery) (*resp
 func (s *ReminderService) MarkRead(userID uint, id uint) error {
 	targetType, targetID := s.decodeID(id)
 	if targetType == "" {
-		return NewServiceError(400, 40001, "invalid reminder id")
+		return NewServiceError(400, ErrCodeInvalidReminderID, "invalid reminder id")
 	}
 	return s.repo.MarkRead(userID, targetType, targetID)
 }
@@ -164,7 +164,7 @@ func (s *ReminderService) MarkAllRead(userID uint) error {
 func (s *ReminderService) Dismiss(userID uint, id uint) error {
 	targetType, targetID := s.decodeID(id)
 	if targetType == "" {
-		return NewServiceError(400, 40001, "invalid reminder id")
+		return NewServiceError(400, ErrCodeInvalidReminderID, "invalid reminder id")
 	}
 	return s.repo.Dismiss(userID, targetType, targetID)
 }

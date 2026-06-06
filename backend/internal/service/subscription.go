@@ -35,12 +35,12 @@ func (s *SubscriptionService) GetByID(userID uint, id uint) (*dto.SubscriptionRe
 	sub, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(404, 40400, "subscription not found")
+			return nil, NewServiceError(404, ErrCodeNotFound,"subscription not found")
 		}
 		return nil, err
 	}
 	if sub.UserID != userID {
-		return nil, NewServiceError(403, 40301, "forbidden")
+		return nil, NewServiceError(403, ErrCodeForbidden,"forbidden")
 	}
 	resp := s.toResponse(sub)
 	return &resp, nil
@@ -88,12 +88,12 @@ func (s *SubscriptionService) Update(userID uint, id uint, req *dto.UpdateSubscr
 	sub, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(404, 40400, "subscription not found")
+			return nil, NewServiceError(404, ErrCodeNotFound,"subscription not found")
 		}
 		return nil, err
 	}
 	if sub.UserID != userID {
-		return nil, NewServiceError(403, 40301, "forbidden")
+		return nil, NewServiceError(403, ErrCodeForbidden,"forbidden")
 	}
 
 	if req.Name != "" {
@@ -140,12 +140,12 @@ func (s *SubscriptionService) Delete(userID uint, id uint) error {
 	sub, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return NewServiceError(404, 40400, "subscription not found")
+			return NewServiceError(404, ErrCodeNotFound,"subscription not found")
 		}
 		return err
 	}
 	if sub.UserID != userID {
-		return NewServiceError(403, 40301, "forbidden")
+		return NewServiceError(403, ErrCodeForbidden,"forbidden")
 	}
 	return s.repo.Delete(id)
 }

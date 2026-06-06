@@ -15,10 +15,22 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
+// UpdateProfile godoc
+// @Summary Update user profile
+// @Description Update the currently authenticated user's nickname and avatar
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param body body dto.UpdateProfileRequest true "Profile data"
+// @Success 200 {object} response.Response{data=dto.UserResponse}
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Router /users/profile [put]
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	var req dto.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, 40001, "invalid parameters")
+		response.Fail(c, 400, service.ErrCodeInvalidParams, "invalid parameters")
 		return
 	}
 
@@ -32,10 +44,22 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	response.OK(c, resp)
 }
 
+// UpdatePassword godoc
+// @Summary Update password
+// @Description Change the currently authenticated user's password
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param body body dto.UpdatePasswordRequest true "Password data"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Router /users/password [put]
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	var req dto.UpdatePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, 40001, "invalid parameters")
+		response.Fail(c, 400, service.ErrCodeInvalidParams, "invalid parameters")
 		return
 	}
 

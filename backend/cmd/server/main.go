@@ -1,3 +1,13 @@
+// StackBill API
+//
+// @title StackBill API
+// @version 1.0
+// @description Digital asset and subscription management platform API
+// @host localhost:8080
+// @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 package main
 
 import (

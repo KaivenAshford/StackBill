@@ -6,11 +6,16 @@ import (
 	"github.com/kingqaquuu/stackbill/internal/middleware"
 	"github.com/kingqaquuu/stackbill/internal/repository"
 	"github.com/kingqaquuu/stackbill/internal/service"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/kingqaquuu/stackbill/docs"
 	"gorm.io/gorm"
 )
 
 func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int) {
 	r.Use(middleware.CORSMiddleware())
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Repositories
 	userRepo := repository.NewUserRepository(db)

@@ -21,7 +21,7 @@ func (s *UserService) GetCurrentUser(userID uint) (*dto.UserResponse, error) {
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(404, 40400, "user not found")
+			return nil, NewServiceError(404, ErrCodeNotFound, "user not found")
 		}
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (s *UserService) UpdateProfile(userID uint, req *dto.UpdateProfileRequest) 
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, NewServiceError(404, 40400, "user not found")
+			return nil, NewServiceError(404, ErrCodeNotFound, "user not found")
 		}
 		return nil, err
 	}
@@ -63,13 +63,13 @@ func (s *UserService) UpdatePassword(userID uint, req *dto.UpdatePasswordRequest
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return NewServiceError(404, 40400, "user not found")
+			return NewServiceError(404, ErrCodeNotFound, "user not found")
 		}
 		return err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword)); err != nil {
-		return NewServiceError(400, 40002, "incorrect old password")
+		return NewServiceError(400, ErrCodeIncorrectPassword, "incorrect old password")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
