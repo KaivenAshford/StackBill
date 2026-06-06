@@ -15,13 +15,16 @@ func NewSubscriptionRepository(db *gorm.DB) *SubscriptionRepository {
 	return &SubscriptionRepository{db: db}
 }
 
-func (r *SubscriptionRepository) List(userID uint, page, pageSize int, categoryID *uint, status string, upcomingRenewal bool) ([]model.Subscription, int64, error) {
+func (r *SubscriptionRepository) List(userID uint, page, pageSize int, categoryID *uint, status, keyword string, upcomingRenewal bool) ([]model.Subscription, int64, error) {
 	q := r.db.Where("user_id = ?", userID)
 	if categoryID != nil {
 		q = q.Where("category_id = ?", *categoryID)
 	}
 	if status != "" {
 		q = q.Where("status = ?", status)
+	}
+	if keyword != "" {
+		q = q.Where("name ILIKE ?", "%"+keyword+"%")
 	}
 	if upcomingRenewal {
 		sevenDays := time.Now().Add(7 * 24 * time.Hour)

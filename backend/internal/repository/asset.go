@@ -15,13 +15,16 @@ func NewAssetRepository(db *gorm.DB) *AssetRepository {
 	return &AssetRepository{db: db}
 }
 
-func (r *AssetRepository) List(userID uint, page, pageSize int, assetType, status string, expiringDays int) ([]model.Asset, int64, error) {
+func (r *AssetRepository) List(userID uint, page, pageSize int, assetType, status, keyword string, expiringDays int) ([]model.Asset, int64, error) {
 	q := r.db.Where("user_id = ?", userID)
 	if assetType != "" {
 		q = q.Where("asset_type = ?", assetType)
 	}
 	if status != "" {
 		q = q.Where("status = ?", status)
+	}
+	if keyword != "" {
+		q = q.Where("name ILIKE ?", "%"+keyword+"%")
 	}
 	if expiringDays > 0 {
 		deadline := time.Now().AddDate(0, 0, expiringDays)

@@ -20,7 +20,7 @@ func NewSubscriptionService(repo *repository.SubscriptionRepository) *Subscripti
 }
 
 func (s *SubscriptionService) List(userID uint, query *dto.SubscriptionListQuery) (*response.PageResult, error) {
-	subs, total, err := s.repo.List(userID, query.Page, query.PageSize, query.CategoryID, query.Status, query.UpcomingRenewal)
+	subs, total, err := s.repo.List(userID, query.Page, query.PageSize, query.CategoryID, query.Status, query.Keyword, query.UpcomingRenewal)
 	if err != nil {
 		return nil, err
 	}

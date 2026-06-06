@@ -7,6 +7,7 @@ export interface SubscriptionQuery {
   category_id?: number
   status?: string
   upcoming_renewal?: boolean
+  keyword?: string
 }
 
 export function listSubscriptions(params?: SubscriptionQuery) {

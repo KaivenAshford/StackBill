@@ -20,7 +20,7 @@ func NewAssetService(repo *repository.AssetRepository) *AssetService {
 }
 
 func (s *AssetService) List(userID uint, query *dto.AssetListQuery) (*response.PageResult, error) {
-	assets, total, err := s.repo.List(userID, query.Page, query.PageSize, query.AssetType, query.Status, query.ExpiringDays)
+	assets, total, err := s.repo.List(userID, query.Page, query.PageSize, query.AssetType, query.Status, query.Keyword, query.ExpiringDays)
 	if err != nil {
 		return nil, err
 	}
@@ -48,18 +48,19 @@ func (s *AssetService) GetByID(userID uint, id uint) (*dto.AssetResponse, error)
 
 func (s *AssetService) Create(userID uint, req *dto.CreateAssetRequest) (*dto.AssetResponse, error) {
 	asset := &model.Asset{
-		UserID:       userID,
-		Name:         req.Name,
-		AssetType:    req.AssetType,
-		Provider:     req.Provider,
-		Identifier:   req.Identifier,
-		URL:          req.URL,
-		CostAmount:   req.CostAmount,
-		CostCurrency: req.CostCurrency,
-		BillingCycle: req.BillingCycle,
-		Description:  req.Description,
-		Remark:       req.Remark,
-		Status:       "active",
+		UserID:         userID,
+		Name:           req.Name,
+		AssetType:      req.AssetType,
+		Provider:       req.Provider,
+		Identifier:     req.Identifier,
+		URL:            req.URL,
+		CostAmount:     req.CostAmount,
+		CostCurrency:   req.CostCurrency,
+		BillingCycle:   req.BillingCycle,
+		SubscriptionID: req.SubscriptionID,
+		Description:    req.Description,
+		Remark:         req.Remark,
+		Status:         "active",
 	}
 	if req.Status != "" {
 		asset.Status = req.Status
@@ -106,6 +107,7 @@ func (s *AssetService) Update(userID uint, id uint, req *dto.UpdateAssetRequest)
 	if req.Status != "" {
 		asset.Status = req.Status
 	}
+	asset.SubscriptionID = req.SubscriptionID
 	asset.Description = req.Description
 	asset.Remark = req.Remark
 
@@ -137,20 +139,21 @@ func (s *AssetService) toResponse(asset *model.Asset) dto.AssetResponse {
 		expireDate = &ed
 	}
 	return dto.AssetResponse{
-		ID:           asset.ID,
-		Name:         asset.Name,
-		AssetType:    asset.AssetType,
-		Provider:     asset.Provider,
-		Identifier:   asset.Identifier,
-		URL:          asset.URL,
-		ExpireDate:   expireDate,
-		CostAmount:   asset.CostAmount,
-		CostCurrency: asset.CostCurrency,
-		BillingCycle: asset.BillingCycle,
-		Status:       asset.Status,
-		Description:  asset.Description,
-		Remark:       asset.Remark,
-		CreatedAt:    asset.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:    asset.UpdatedAt.Format("2006-01-02 15:04:05"),
+		ID:             asset.ID,
+		Name:           asset.Name,
+		AssetType:      asset.AssetType,
+		Provider:       asset.Provider,
+		Identifier:     asset.Identifier,
+		URL:            asset.URL,
+		ExpireDate:     expireDate,
+		CostAmount:     asset.CostAmount,
+		CostCurrency:   asset.CostCurrency,
+		BillingCycle:   asset.BillingCycle,
+		Status:         asset.Status,
+		SubscriptionID: asset.SubscriptionID,
+		Description:    asset.Description,
+		Remark:         asset.Remark,
+		CreatedAt:      asset.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:      asset.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 }

@@ -58,4 +58,5 @@ type SubscriptionListQuery struct {
 	CategoryID      *uint  `form:"category_id"`
 	Status          string `form:"status"`
 	UpcomingRenewal bool   `form:"upcoming_renewal"`
+	Keyword         string `form:"keyword"`
 }

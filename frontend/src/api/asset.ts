@@ -7,6 +7,7 @@ export interface AssetQuery {
   asset_type?: string
   status?: string
   expiring_days?: number
+  keyword?: string
 }
 
 export function listAssets(params?: AssetQuery) {

@@ -9,6 +9,40 @@
         {{ t('common.create') }}
       </n-button>
     </div>
+
+    <div class="filter-bar">
+      <n-input
+        v-model:value="filters.keyword"
+        :placeholder="t('common.search')"
+        clearable
+        class="filter-search"
+        @update:value="debouncedFetch"
+      >
+        <template #prefix>
+          <Search :size="14" />
+        </template>
+      </n-input>
+      <n-select
+        v-model:value="filters.status"
+        :options="statusFilterOptions"
+        :placeholder="t('common.allStatus')"
+        clearable
+        class="filter-select"
+        @update:value="fetchFiltered"
+      />
+      <n-select
+        v-model:value="filters.category_id"
+        :options="categoryFilterOptions"
+        :placeholder="t('common.allCategories')"
+        clearable
+        class="filter-select"
+        @update:value="fetchFiltered"
+      />
+      <n-button v-if="hasActiveFilters" quaternary size="small" @click="clearFilters">
+        {{ t('common.clearFilter') }}
+      </n-button>
+    </div>
+
     <div class="table-card">
       <div v-if="loading" class="table-skeleton">
         <div class="skeleton-row skeleton-row--head">
@@ -39,23 +73,74 @@
 import { ref, reactive, computed, onMounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { NDataTable, NTag, NButton, NSpace, NTooltip, useMessage, useDialog } from 'naive-ui'
-import { Plus, Pencil, Trash2 } from '@lucide/vue'
+import { NDataTable, NTag, NButton, NSpace, NTooltip, NInput, NSelect, useMessage, useDialog } from 'naive-ui'
+import { Plus, Pencil, Trash2, Search } from '@lucide/vue'
 import { deleteSubscription } from '@/api/subscription'
 import { formatAmount } from '@/utils/currency'
 import { useSubscriptionLabels } from '@/utils/mappings'
 import type { Subscription } from '@/types'
+import type { SubscriptionQuery } from '@/api/subscription'
 import { useSubscriptionStore } from '@/stores/subscription'
+import { useCategoryStore } from '@/stores/category'
 
 const { t } = useI18n()
 const router = useRouter()
 const message = useMessage()
 const dialog = useDialog()
 const subscriptionStore = useSubscriptionStore()
+const categoryStore = useCategoryStore()
 const { cycleLabel, statusLabel, statusType } = useSubscriptionLabels()
 const loading = computed(() => !subscriptionStore.loaded)
 const page = ref(1)
 const pagination = reactive({ page: 1, pageSize: 20, get itemCount() { return subscriptionStore.total }, showSizePicker: false, onChange: (p: number) => { page.value = p; fetchData() } })
+
+const filters = reactive({
+  keyword: '',
+  status: null as string | null,
+  category_id: null as number | null,
+})
+
+const hasActiveFilters = computed(() => filters.keyword || filters.status || filters.category_id)
+
+const statusFilterOptions = [
+  { label: () => t('subscription.active'), value: 'active' },
+  { label: () => t('subscription.paused'), value: 'paused' },
+  { label: () => t('subscription.cancelled'), value: 'cancelled' },
+  { label: () => t('subscription.expired'), value: 'expired' },
+]
+
+const categoryFilterOptions = computed(() =>
+  categoryStore.categories
+    .filter(c => c.type === 'subscription')
+    .map(c => ({ label: c.name, value: c.id }))
+)
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+function debouncedFetch() {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => fetchFiltered(), 300)
+}
+
+function buildQuery(): SubscriptionQuery {
+  const query: SubscriptionQuery = { page: page.value, page_size: 20 }
+  if (filters.keyword) query.keyword = filters.keyword
+  if (filters.status) query.status = filters.status
+  if (filters.category_id) query.category_id = filters.category_id
+  return query
+}
+
+function clearFilters() {
+  filters.keyword = ''
+  filters.status = null
+  filters.category_id = null
+  page.value = 1
+  fetchData()
+}
+
+async function fetchFiltered() {
+  page.value = 1
+  await fetchData()
+}
 
 const columns = [
   {
@@ -106,10 +191,13 @@ const columns = [
   },
 ]
 
-onMounted(() => subscriptionStore.ensureLoaded())
+onMounted(async () => {
+  await categoryStore.ensureLoaded('subscription')
+  await subscriptionStore.ensureLoaded()
+})
 
 async function fetchData() {
-  await subscriptionStore.refresh(page.value)
+  await subscriptionStore.refresh(buildQuery())
   pagination.page = page.value
 }
 
@@ -127,7 +215,7 @@ async function handleDelete(id: number) {
   try {
     await deleteSubscription(id)
     message.success(t('common.success'))
-    await subscriptionStore.refresh(page.value)
+    await fetchData()
   } catch (e: unknown) {
     message.error((e as Error).message || t('common.failed'))
   }
@@ -135,6 +223,22 @@ async function handleDelete(id: number) {
 </script>
 
 <style scoped>
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.filter-search {
+  width: 200px;
+}
+
+.filter-select {
+  width: 150px;
+}
+
 .table-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -178,6 +282,14 @@ async function handleDelete(id: number) {
   }
   .skeleton-row--head {
     display: none;
+  }
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-search,
+  .filter-select {
+    width: 100%;
   }
 }
 

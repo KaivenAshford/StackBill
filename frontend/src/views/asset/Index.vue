@@ -9,6 +9,40 @@
         {{ t('common.create') }}
       </n-button>
     </div>
+
+    <div class="filter-bar">
+      <n-input
+        v-model:value="filters.keyword"
+        :placeholder="t('common.search')"
+        clearable
+        class="filter-search"
+        @update:value="debouncedFetch"
+      >
+        <template #prefix>
+          <Search :size="14" />
+        </template>
+      </n-input>
+      <n-select
+        v-model:value="filters.asset_type"
+        :options="typeFilterOptions"
+        :placeholder="t('common.allTypes')"
+        clearable
+        class="filter-select"
+        @update:value="fetchFiltered"
+      />
+      <n-select
+        v-model:value="filters.status"
+        :options="statusFilterOptions"
+        :placeholder="t('common.allStatus')"
+        clearable
+        class="filter-select"
+        @update:value="fetchFiltered"
+      />
+      <n-button v-if="hasActiveFilters" quaternary size="small" @click="clearFilters">
+        {{ t('common.clearFilter') }}
+      </n-button>
+    </div>
+
     <div class="table-card">
       <div v-if="loading" class="table-skeleton">
         <div class="skeleton-row skeleton-row--head">
@@ -41,12 +75,13 @@
 import { ref, reactive, computed, onMounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { NDataTable, NTag, NButton, NSpace, NTooltip, useMessage, useDialog } from 'naive-ui'
-import { Plus, Pencil, Trash2 } from '@lucide/vue'
+import { NDataTable, NTag, NButton, NSpace, NTooltip, NInput, NSelect, useMessage, useDialog } from 'naive-ui'
+import { Plus, Pencil, Trash2, Search } from '@lucide/vue'
 import { deleteAsset } from '@/api/asset'
 import { formatAmount } from '@/utils/currency'
 import { useAssetLabels } from '@/utils/mappings'
 import type { Asset } from '@/types'
+import type { AssetQuery } from '@/api/asset'
 import { useAssetStore } from '@/stores/asset'
 
 const { t } = useI18n()
@@ -58,6 +93,58 @@ const { typeLabel, statusLabel, statusType } = useAssetLabels()
 const loading = computed(() => !assetStore.loaded)
 const page = ref(1)
 const pagination = reactive({ page: 1, pageSize: 20, get itemCount() { return assetStore.total }, showSizePicker: false, onChange: (p: number) => { page.value = p; fetchData() } })
+
+const filters = reactive({
+  keyword: '',
+  asset_type: null as string | null,
+  status: null as string | null,
+})
+
+const hasActiveFilters = computed(() => filters.keyword || filters.asset_type || filters.status)
+
+const typeFilterOptions = [
+  { label: () => t('asset.domain'), value: 'domain' },
+  { label: () => t('asset.server'), value: 'server' },
+  { label: () => t('asset.dockerService'), value: 'docker_service' },
+  { label: () => t('asset.sslCertificate'), value: 'ssl_certificate' },
+  { label: () => t('asset.apiKey'), value: 'api_key' },
+  { label: () => t('asset.repository'), value: 'repository' },
+  { label: () => t('asset.other'), value: 'other' },
+]
+
+const statusFilterOptions = [
+  { label: () => t('asset.active'), value: 'active' },
+  { label: () => t('asset.inactive'), value: 'inactive' },
+  { label: () => t('asset.expired'), value: 'expired' },
+  { label: () => t('asset.warning'), value: 'warning' },
+]
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+function debouncedFetch() {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => fetchFiltered(), 300)
+}
+
+function buildQuery(): AssetQuery {
+  const query: AssetQuery = { page: page.value, page_size: 20 }
+  if (filters.keyword) query.keyword = filters.keyword
+  if (filters.asset_type) query.asset_type = filters.asset_type
+  if (filters.status) query.status = filters.status
+  return query
+}
+
+function clearFilters() {
+  filters.keyword = ''
+  filters.asset_type = null
+  filters.status = null
+  page.value = 1
+  fetchData()
+}
+
+async function fetchFiltered() {
+  page.value = 1
+  await fetchData()
+}
 
 const columns = [
   {
@@ -114,7 +201,7 @@ const columns = [
 onMounted(() => assetStore.ensureLoaded())
 
 async function fetchData() {
-  await assetStore.refresh(page.value)
+  await assetStore.refresh(buildQuery())
   pagination.page = page.value
 }
 
@@ -132,7 +219,7 @@ async function handleDelete(id: number) {
   try {
     await deleteAsset(id)
     message.success(t('common.success'))
-    await assetStore.refresh(page.value)
+    await fetchData()
   } catch (e: unknown) {
     message.error((e as Error).message || t('common.failed'))
   }
@@ -140,6 +227,22 @@ async function handleDelete(id: number) {
 </script>
 
 <style scoped>
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.filter-search {
+  width: 200px;
+}
+
+.filter-select {
+  width: 150px;
+}
+
 .table-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -183,6 +286,14 @@ async function handleDelete(id: number) {
   }
   .skeleton-row--head {
     display: none;
+  }
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-search,
+  .filter-select {
+    width: 100%;
   }
 }
 
