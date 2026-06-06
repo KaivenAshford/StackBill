@@ -2,12 +2,22 @@
   <div>
     <div class="page-toolbar">
       <h2 class="page-heading">{{ t('nav.subscriptions') }}</h2>
-      <n-button type="primary" @click="$router.push('/subscriptions/new')">
-        <template #icon>
-          <Plus :size="16" :stroke-width="1.5" />
-        </template>
-        {{ t('common.create') }}
-      </n-button>
+      <n-space>
+        <n-button @click="handleExport">
+          <template #icon><Download :size="16" :stroke-width="1.5" /></template>
+          {{ t('common.exportCSV') }}
+        </n-button>
+        <n-upload :show-file-list="false" accept=".csv" :custom-request="handleImport">
+          <n-button>
+            <template #icon><Upload :size="16" :stroke-width="1.5" /></template>
+            {{ t('common.importCSV') }}
+          </n-button>
+        </n-upload>
+        <n-button type="primary" @click="$router.push('/subscriptions/new')">
+          <template #icon><Plus :size="16" :stroke-width="1.5" /></template>
+          {{ t('common.create') }}
+        </n-button>
+      </n-space>
     </div>
 
     <div class="filter-bar">
@@ -73,9 +83,10 @@
 import { ref, reactive, computed, onMounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { NDataTable, NTag, NButton, NSpace, NTooltip, NInput, NSelect, useMessage, useDialog } from 'naive-ui'
-import { Plus, Pencil, Trash2, Search } from '@lucide/vue'
+import { NDataTable, NTag, NButton, NSpace, NTooltip, NInput, NSelect, NUpload, useMessage, useDialog } from 'naive-ui'
+import { Plus, Pencil, Trash2, Search, Download, Upload } from '@lucide/vue'
 import { deleteSubscription } from '@/api/subscription'
+import request from '@/utils/request'
 import { formatAmount } from '@/utils/currency'
 import { useSubscriptionLabels } from '@/utils/mappings'
 import type { Subscription } from '@/types'
@@ -214,6 +225,36 @@ function confirmDelete(id: number) {
 async function handleDelete(id: number) {
   try {
     await deleteSubscription(id)
+    message.success(t('common.success'))
+    await fetchData()
+  } catch (e: unknown) {
+    message.error((e as Error).message || t('common.failed'))
+  }
+}
+
+async function handleExport() {
+  try {
+    const token = localStorage.getItem('token')
+    const res = await fetch('/api/v1/subscriptions/export', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'subscriptions.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch {
+    message.error(t('common.failed'))
+  }
+}
+
+async function handleImport({ file }: { file: { file: File } }) {
+  try {
+    const formData = new FormData()
+    formData.append('file', file.file)
+    await request.post('/subscriptions/import', formData)
     message.success(t('common.success'))
     await fetchData()
   } catch (e: unknown) {

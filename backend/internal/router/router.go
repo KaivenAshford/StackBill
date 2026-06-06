@@ -32,6 +32,8 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cor
 	assetService := service.NewAssetService(assetRepo)
 	reminderService := service.NewReminderService(reminderRepo)
 	dashboardService := service.NewDashboardService(subscriptionRepo, assetRepo, reminderRepo, categoryRepo, subscriptionService)
+	exportService := service.NewExportService(subscriptionRepo, assetRepo)
+	importService := service.NewImportService(subscriptionRepo, assetRepo)
 
 	// Handlers
 	authHandler := api.NewAuthHandler(authService, userService)
@@ -41,6 +43,8 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cor
 	assetHandler := api.NewAssetHandler(assetService)
 	reminderHandler := api.NewReminderHandler(reminderService)
 	dashboardHandler := api.NewDashboardHandler(dashboardService)
+	exportHandler := api.NewExportHandler(exportService)
+	importHandler := api.NewImportHandler(importService)
 
 	apiGroup := r.Group("/api/v1")
 	{
@@ -74,6 +78,8 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cor
 
 		// Subscriptions
 		authorized.GET("/subscriptions", subscriptionHandler.List)
+		authorized.GET("/subscriptions/export", exportHandler.ExportSubscriptions)
+		authorized.POST("/subscriptions/import", importHandler.ImportSubscriptions)
 		authorized.GET("/subscriptions/:id", subscriptionHandler.GetByID)
 		authorized.POST("/subscriptions", subscriptionHandler.Create)
 		authorized.PUT("/subscriptions/:id", subscriptionHandler.Update)
@@ -81,6 +87,8 @@ func Setup(r *gin.Engine, db *gorm.DB, jwtSecret string, jwtExpireHours int, cor
 
 		// Assets
 		authorized.GET("/assets", assetHandler.List)
+		authorized.GET("/assets/export", exportHandler.ExportAssets)
+		authorized.POST("/assets/import", importHandler.ImportAssets)
 		authorized.GET("/assets/:id", assetHandler.GetByID)
 		authorized.POST("/assets", assetHandler.Create)
 		authorized.PUT("/assets/:id", assetHandler.Update)
