@@ -3,9 +3,10 @@ package model
 import "time"
 
 type ReminderRead struct {
-	ID         uint      `gorm:"primarykey" json:"id"`
-	UserID     uint      `gorm:"uniqueIndex:idx_reminder_read;not null" json:"user_id"`
-	TargetType string    `gorm:"uniqueIndex:idx_reminder_read;size:30;not null" json:"target_type"`
-	TargetID   uint      `gorm:"uniqueIndex:idx_reminder_read;not null" json:"target_id"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID        uint      `gorm:"primarykey" json:"id"`
+	UserID    uint      `gorm:"uniqueIndex:idx_reminder_read;not null" json:"user_id"`
+	TargetType string   `gorm:"uniqueIndex:idx_reminder_read;size:30;not null" json:"target_type"`
+	TargetID  uint      `gorm:"uniqueIndex:idx_reminder_read;not null" json:"target_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
