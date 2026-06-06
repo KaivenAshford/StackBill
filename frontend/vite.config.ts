@@ -25,7 +25,7 @@ export default defineConfig({
           'naive-ui': ['naive-ui'],
           'echarts': ['echarts/core', 'echarts/charts', 'echarts/components', 'echarts/renderers'],
           'vendor': ['vue', 'vue-router', 'pinia', 'axios', 'vue-i18n'],
-        },
+        } as Record<string, string[]>,
       },
     },
   },

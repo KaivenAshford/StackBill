@@ -86,6 +86,7 @@ import { ref, reactive, computed, onMounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { NDataTable, NTag, NButton, NSpace, NTooltip, NInput, NSelect, NUpload, useMessage, useDialog } from 'naive-ui'
+import type { UploadCustomRequestOptions } from 'naive-ui'
 import { Plus, Pencil, Trash2, Search, Download, Upload } from '@lucide/vue'
 import { deleteAsset } from '@/api/asset'
 import request from '@/utils/request'
@@ -254,7 +255,8 @@ async function handleExport() {
   }
 }
 
-async function handleImport({ file }: { file: { file: File } }) {
+async function handleImport({ file }: UploadCustomRequestOptions) {
+  if (!file.file) return
   try {
     const formData = new FormData()
     formData.append('file', file.file)

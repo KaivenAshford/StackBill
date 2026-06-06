@@ -134,7 +134,7 @@ func TestAuthService_Register_CreatesDefaultCategories(t *testing.T) {
 	if err != nil {
 		t.Fatalf("list categories: %v", err)
 	}
-	if len(cats) != 8 {
-		t.Errorf("got %d categories, want 8", len(cats))
+	if len(cats) != 11 {
+		t.Errorf("got %d categories, want 11", len(cats))
 	}
 }

@@ -154,9 +154,9 @@ async function handleSave() {
   saving.value = true
   try {
     if (isEdit.value) {
-      await updateAsset(id, { ...form })
+      await updateAsset(id, { ...form } as Partial<Asset>)
     } else {
-      await createAsset({ ...form })
+      await createAsset({ ...form } as Partial<Asset>)
     }
     message.success(t('common.success'))
     useAssetStore().invalidate()

@@ -91,10 +91,10 @@ func (r *SubscriptionRepository) GetCategoryExpense(userID uint) ([]CategoryExpe
 		SELECT c.id as category_id, c.name as category_name, c.color,
 			COALESCE(SUM(
 				CASE s.billing_cycle
-					WHEN 'weekly' THEN s.amount * 4.33 / GREATEST(s.billing_interval, 1)
-					WHEN 'monthly' THEN s.amount / GREATEST(s.billing_interval, 1)
-					WHEN 'quarterly' THEN s.amount / 3.0 / GREATEST(s.billing_interval, 1)
-					WHEN 'yearly' THEN s.amount / 12.0 / GREATEST(s.billing_interval, 1)
+					WHEN 'weekly' THEN s.amount * 4.33 / CASE WHEN s.billing_interval > 0 THEN s.billing_interval ELSE 1 END
+					WHEN 'monthly' THEN s.amount / CASE WHEN s.billing_interval > 0 THEN s.billing_interval ELSE 1 END
+					WHEN 'quarterly' THEN s.amount / 3.0 / CASE WHEN s.billing_interval > 0 THEN s.billing_interval ELSE 1 END
+					WHEN 'yearly' THEN s.amount / 12.0 / CASE WHEN s.billing_interval > 0 THEN s.billing_interval ELSE 1 END
 					ELSE 0
 				END
 			), 0) as amount

@@ -141,9 +141,9 @@ async function handleSave() {
   saving.value = true
   try {
     if (isEdit.value) {
-      await updateSubscription(id, { ...form })
+      await updateSubscription(id, { ...form } as Partial<Subscription>)
     } else {
-      await createSubscription({ ...form })
+      await createSubscription({ ...form } as Partial<Subscription>)
     }
     message.success(t('common.success'))
     useSubscriptionStore().invalidate()

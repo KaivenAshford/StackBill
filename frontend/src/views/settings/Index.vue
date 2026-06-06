@@ -254,7 +254,6 @@ async function handleChangePassword() {
     await updatePassword({
       old_password: passwordForm.old_password,
       new_password: passwordForm.new_password,
-      confirm_password: passwordForm.confirm_password,
     })
     message.success(t('common.success'))
     passwordForm.old_password = ''
